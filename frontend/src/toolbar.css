@@ -1,0 +1,10 @@
+.toolbar{
+    position: absolute;
+    z-index: 2;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+  
+  }

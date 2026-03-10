@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: mini-sagemaker-backend
+    environment:
+      RUNS_DIR: /app/backend/.runs
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/.runs:/app/backend/.runs
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mini-sagemaker-frontend
+    environment:
+      HOST: 0.0.0.0
+      CHOKIDAR_USEPOLLING: "true"
+      REACT_APP_API_BASE: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

@@ -1,0 +1,10 @@
+{
+  "run_id": "run_00c99b0891",
+  "artifacts": [
+    {
+      "node_id": "file_source-1",
+      "type": "file_source",
+      "value": "/app/backend/.runs/demo/input.txt"
+    }
+  ]
+}

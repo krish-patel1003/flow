@@ -1,0 +1,1 @@
+{"input": "hello from mini sagemaker", "script": "def transform(input_data):\n    return str(input_data).upper()"}
