@@ -97,6 +97,12 @@
   padding-top: 8px;
 }
 
+.inline-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .inspector-empty {
   color: #506d85;
 }

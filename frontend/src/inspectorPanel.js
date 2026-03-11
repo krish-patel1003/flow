@@ -106,7 +106,7 @@ export const InspectorPanel = () => {
     if (selectedNode.type === 'manual_trigger') {
       return (
         <div className="inspector-empty">
-          <p>Manual Trigger does not require required fields.</p>
+          <p>Manual Trigger has no required fields.</p>
           {renderAdvancedRetry()}
         </div>
       );
@@ -236,6 +236,271 @@ export const InspectorPanel = () => {
             step="0.1"
             value={config.temperature ?? 0.2}
             onChange={(event) => setConfig({ temperature: toNumber(event.target.value, 0.2) })}
+          />
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'text') {
+      return (
+        <>
+          <label>Template</label>
+          <textarea
+            value={config.template || '{{input}}'}
+            onChange={(event) => setConfig({ template: event.target.value })}
+            style={{ minHeight: '100px' }}
+          />
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'math') {
+      return (
+        <>
+          <label>Operation</label>
+          <select
+            value={config.operation || 'add'}
+            onChange={(event) => setConfig({ operation: event.target.value })}
+          >
+            <option value="add">Add</option>
+            <option value="subtract">Subtract</option>
+            <option value="multiply">Multiply</option>
+            <option value="divide">Divide</option>
+          </select>
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'conditional') {
+      return (
+        <>
+          <label>Operator</label>
+          <select
+            value={config.operator || '=='}
+            onChange={(event) => setConfig({ operator: event.target.value })}
+          >
+            <option value="==">==</option>
+            <option value="!=">!=</option>
+            <option value=">">&gt;</option>
+            <option value="<">&lt;</option>
+            <option value=">=">&gt;=</option>
+            <option value="<=">&lt;=</option>
+          </select>
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'imageProcessing') {
+      return (
+        <>
+          <label>Operation</label>
+          <select
+            value={config.operation || 'grayscale'}
+            onChange={(event) => setConfig({ operation: event.target.value })}
+          >
+            <option value="grayscale">Grayscale</option>
+            <option value="blur">Blur</option>
+            <option value="sharpen">Sharpen</option>
+          </select>
+          <label>Output Path</label>
+          <input
+            type="text"
+            value={config.outputPath || ''}
+            placeholder="/tmp/output.png"
+            onChange={(event) => setConfig({ outputPath: event.target.value })}
+          />
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'dataAggregation') {
+      return (
+        <>
+          <label>Aggregation</label>
+          <select
+            value={config.aggregationType || 'sum'}
+            onChange={(event) => setConfig({ aggregationType: event.target.value })}
+          >
+            <option value="sum">Sum</option>
+            <option value="average">Average</option>
+            <option value="max">Max</option>
+            <option value="min">Min</option>
+            <option value="concat">Concat</option>
+          </select>
+          <label>Static Values (comma separated)</label>
+          <input
+            type="text"
+            value={Array.isArray(config.values) ? config.values.join(',') : ''}
+            onChange={(event) =>
+              setConfig({
+                values: event.target.value
+                  .split(',')
+                  .map((item) => item.trim())
+                  .filter(Boolean),
+              })
+            }
+          />
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'json_extract') {
+      return (
+        <>
+          <label>Path</label>
+          <input
+            type="text"
+            value={config.path || ''}
+            placeholder="user.profile.name"
+            onChange={(event) => setConfig({ path: event.target.value })}
+          />
+          <label className="inline-check">
+            <input
+              type="checkbox"
+              checked={Boolean(config.use_default)}
+              onChange={(event) => setConfig({ use_default: event.target.checked })}
+            />
+            Use default when path is missing
+          </label>
+          <label>Default Value</label>
+          <input
+            type="text"
+            value={config.default ?? ''}
+            onChange={(event) => setConfig({ default: event.target.value })}
+          />
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'join_merge') {
+      return (
+        <>
+          <label>Strategy</label>
+          <select
+            value={config.strategy || 'object_merge'}
+            onChange={(event) => setConfig({ strategy: event.target.value })}
+          >
+            <option value="object_merge">Object Merge</option>
+            <option value="concat">Concat</option>
+            <option value="zip">Zip Lists</option>
+          </select>
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'schema_validate') {
+      return (
+        <>
+          <label>Schema Type</label>
+          <select
+            value={config.schema_type || 'required_keys'}
+            onChange={(event) => setConfig({ schema_type: event.target.value })}
+          >
+            <option value="required_keys">Required Keys</option>
+            <option value="type_check">Type Check</option>
+          </select>
+          {config.schema_type === 'required_keys' ? (
+            <>
+              <label>Required Keys (comma separated)</label>
+              <input
+                type="text"
+                value={Array.isArray(config.required_keys) ? config.required_keys.join(',') : ''}
+                onChange={(event) =>
+                  setConfig({
+                    required_keys: event.target.value
+                      .split(',')
+                      .map((item) => item.trim())
+                      .filter(Boolean),
+                  })
+                }
+              />
+            </>
+          ) : (
+            <>
+              <label>Expected Type</label>
+              <select
+                value={config.expected_type || 'dict'}
+                onChange={(event) => setConfig({ expected_type: event.target.value })}
+              >
+                <option value="dict">Object</option>
+                <option value="list">List</option>
+                <option value="string">String</option>
+                <option value="number">Number</option>
+                <option value="boolean">Boolean</option>
+              </select>
+            </>
+          )}
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'filter') {
+      return (
+        <>
+          <label>Field (optional)</label>
+          <input
+            type="text"
+            value={config.field || ''}
+            placeholder="score"
+            onChange={(event) => setConfig({ field: event.target.value })}
+          />
+          <label>Operator</label>
+          <select
+            value={config.operator || '=='}
+            onChange={(event) => setConfig({ operator: event.target.value })}
+          >
+            <option value="==">Equals</option>
+            <option value="!=">Not equals</option>
+            <option value=">">Greater than</option>
+            <option value="<">Less than</option>
+            <option value=">=">Greater or equal</option>
+            <option value="<=">Less or equal</option>
+            <option value="contains">Contains</option>
+          </select>
+          <label>Value</label>
+          <input
+            type="text"
+            value={config.value ?? ''}
+            onChange={(event) => setConfig({ value: event.target.value })}
+          />
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'notification') {
+      return (
+        <>
+          <label>Channel</label>
+          <select
+            value={config.channel || 'log'}
+            onChange={(event) => setConfig({ channel: event.target.value })}
+          >
+            <option value="log">Log</option>
+            <option value="webhook">Webhook</option>
+          </select>
+          {config.channel === 'webhook' ? (
+            <>
+              <label>Webhook URL</label>
+              <input
+                type="text"
+                value={config.target || ''}
+                onChange={(event) => setConfig({ target: event.target.value })}
+              />
+              <label>Timeout (seconds)</label>
+              <input
+                type="number"
+                min="1"
+                max="60"
+                value={config.timeout_seconds ?? 10}
+                onChange={(event) => setConfig({ timeout_seconds: toNumber(event.target.value, 10) })}
+              />
+            </>
+          ) : null}
+          <label>Message Template</label>
+          <textarea
+            value={config.template || '{{input}}'}
+            onChange={(event) => setConfig({ template: event.target.value })}
+            style={{ minHeight: '80px' }}
           />
           {renderAdvancedRetry()}
         </>
