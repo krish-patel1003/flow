@@ -296,3 +296,43 @@ def test_validate_pipeline_supports_json_extract_join_merge_schema_validate_node
     assert response.status_code == 200
     payload = response.json()
     assert payload["valid"] is True
+
+
+def test_validate_pipeline_supports_filter_and_notification_nodes() -> None:
+    pipeline = {
+        "id": "pipe-v2-routing",
+        "name": "v2 routing",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "filter",
+                "position": {"x": 10, "y": 0},
+                "config": {"field": "score", "operator": ">=", "value": 80},
+            },
+            {
+                "id": "n3",
+                "type": "notification",
+                "position": {"x": 20, "y": 0},
+                "config": {"channel": "log", "template": "score={{input}}"},
+            },
+        ],
+        "edges": [
+            {
+                "id": "e1",
+                "source": {"node_id": "n1", "port": "start"},
+                "target": {"node_id": "n2", "port": "input"},
+            },
+            {
+                "id": "e2",
+                "source": {"node_id": "n2", "port": "pass"},
+                "target": {"node_id": "n3", "port": "message"},
+            },
+        ],
+    }
+
+    response = client.post("/pipelines/validate", json=pipeline)
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["valid"] is True

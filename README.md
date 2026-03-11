@@ -18,6 +18,8 @@ Currently executable nodes:
 - `json_extract`
 - `join_merge`
 - `schema_validate`
+- `filter`
+- `notification`
 
 The UI still shows `customInput` and `customOutput` as "Coming soon".
 

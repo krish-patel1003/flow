@@ -44,6 +44,8 @@ export const PipelineToolbar = () => {
     json_extract: Text,
     join_merge: DataAggregation,
     schema_validate: Conditional,
+    filter: Conditional,
+    notification: API,
     customInput: Input,
     customOutput: Output,
   };

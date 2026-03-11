@@ -151,6 +151,31 @@ export const v1NodeRegistry = {
       expected_type: 'dict',
     },
   },
+  filter: {
+    label: 'Filter',
+    executable: true,
+    category: 'routing',
+    description: 'Evaluate a rule and label payload as pass or fail.',
+    tags: ['rule', 'branch', 'condition'],
+    defaults: {
+      field: '',
+      operator: '==',
+      value: '',
+    },
+  },
+  notification: {
+    label: 'Notification',
+    executable: true,
+    category: 'integrations',
+    description: 'Send a message to logs or a webhook endpoint.',
+    tags: ['alert', 'webhook', 'message'],
+    defaults: {
+      channel: 'log',
+      target: '',
+      template: '{{input}}',
+      timeout_seconds: 10,
+    },
+  },
 };
 
 export const comingSoonNodes = [

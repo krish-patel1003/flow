@@ -153,6 +153,27 @@ class SchemaValidateConfig(BaseModel):
     retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
 
 
+class FilterConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    field: str = ""
+    operator: Literal["==", "!=", ">", "<", ">=", "<=", "contains"] = "=="
+    value: Any = ""
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class NotificationConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    channel: Literal["log", "webhook"] = "log"
+    target: str = ""
+    template: str = "{{input}}"
+    timeout_seconds: int = Field(default=10, ge=1, le=60)
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
 NodeType = Literal[
     "manual_trigger",
     "file_source",
@@ -170,6 +191,8 @@ NodeType = Literal[
     "json_extract",
     "join_merge",
     "schema_validate",
+    "filter",
+    "notification",
 ]
 
 
@@ -188,6 +211,8 @@ NodeConfig = Union[
     JsonExtractConfig,
     JoinMergeConfig,
     SchemaValidateConfig,
+    FilterConfig,
+    NotificationConfig,
     Dict[str, Any],
 ]
 

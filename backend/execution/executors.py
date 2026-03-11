@@ -358,3 +358,81 @@ def execute_schema_validate(node_config: dict, incoming_data):
         "errors": errors,
         "value": incoming_data,
     }
+
+
+def execute_filter(node_config: dict, incoming_data):
+    field = str(node_config.get("field", "")).strip()
+    operator = node_config.get("operator", "==")
+    expected = node_config.get("value")
+
+    left = incoming_data
+    if field:
+        if isinstance(incoming_data, dict):
+            left = incoming_data.get(field)
+        else:
+            left = None
+
+    matched = False
+    if operator == "==":
+        matched = left == expected
+    elif operator == "!=":
+        matched = left != expected
+    elif operator == ">":
+        matched = float(left) > float(expected)
+    elif operator == "<":
+        matched = float(left) < float(expected)
+    elif operator == ">=":
+        matched = float(left) >= float(expected)
+    elif operator == "<=":
+        matched = float(left) <= float(expected)
+    elif operator == "contains":
+        matched = str(expected) in str(left)
+    else:
+        raise ValueError(f"Unsupported filter operator: {operator}")
+
+    return {
+        "matched": matched,
+        "pass": incoming_data if matched else None,
+        "fail": incoming_data if not matched else None,
+    }
+
+
+def execute_notification(node_config: dict, incoming_data):
+    channel = node_config.get("channel", "log")
+    target = str(node_config.get("target", "")).strip()
+    template = str(node_config.get("template", "{{input}}"))
+    timeout = int(node_config.get("timeout_seconds", 10))
+
+    message = template
+    if isinstance(incoming_data, dict):
+        for key, value in incoming_data.items():
+            message = message.replace(f"{{{{{key}}}}}", str(value))
+    message = message.replace("{{input}}", "" if incoming_data is None else str(incoming_data))
+
+    if channel == "log":
+        return {"status": "sent", "channel": "log", "message": message}
+
+    if channel == "webhook":
+        if not target:
+            raise ValueError("notification target is required for webhook channel")
+        payload = {"message": message, "payload": incoming_data}
+        req = urlrequest.Request(
+            url=target,
+            method="POST",
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(payload).encode("utf-8"),
+        )
+        try:
+            with urlrequest.urlopen(req, timeout=timeout) as response:
+                body = response.read().decode("utf-8")
+                return {
+                    "status": "sent",
+                    "channel": "webhook",
+                    "target": target,
+                    "response_status": response.status,
+                    "response_body": body,
+                }
+        except urlerror.URLError as exc:
+            raise RuntimeError(f"Notification webhook failed: {exc.reason}") from exc
+
+    raise ValueError(f"Unsupported notification channel: {channel}")

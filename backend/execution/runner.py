@@ -18,12 +18,14 @@ from .executors import (
     execute_data_aggregation,
     execute_file_sink,
     execute_file_source,
+    execute_filter,
     execute_image_processing,
     execute_json_extract,
     execute_join_merge,
     execute_llm,
     execute_manual_trigger,
     execute_math,
+    execute_notification,
     execute_python_transform,
     execute_schema_validate,
     execute_text,
@@ -172,6 +174,10 @@ class RunManager:
             return execute_join_merge(node_config, incoming), "", []
         if node_type == "schema_validate":
             return execute_schema_validate(node_config, incoming), "", []
+        if node_type == "filter":
+            return execute_filter(node_config, incoming), "", []
+        if node_type == "notification":
+            return execute_notification(node_config, incoming), "", []
         raise RuntimeError(f"Unsupported node type at runtime: {node_type}")
 
     def _execute_node_with_retry(self, node, node_state: dict, incoming: object, context: RuntimeContext):

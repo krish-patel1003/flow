@@ -13,9 +13,11 @@ from .schemas import (
     ErrorDetail,
     FileSinkConfig,
     FileSourceConfig,
+    FilterConfig,
     ImageProcessingConfig,
     LLMConfig,
     MathConfig,
+    NotificationConfig,
     Pipeline,
     PythonTransformConfig,
     JsonExtractConfig,
@@ -76,6 +78,12 @@ def _validate_node_config(node_type: str, config: dict, node_id: str) -> list[Er
             return []
         if node_type == "schema_validate":
             SchemaValidateConfig.model_validate(config)
+            return []
+        if node_type == "filter":
+            FilterConfig.model_validate(config)
+            return []
+        if node_type == "notification":
+            NotificationConfig.model_validate(config)
             return []
     except ValidationError as exc:
         first = exc.errors()[0]

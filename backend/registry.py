@@ -20,6 +20,8 @@ EXECUTABLE_NODE_TYPES: FrozenSet[str] = frozenset(
         "json_extract",
         "join_merge",
         "schema_validate",
+        "filter",
+        "notification",
     }
 )
 
@@ -65,6 +67,8 @@ NODE_PORTS: Dict[str, NodePorts] = {
     "json_extract": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"value"})),
     "join_merge": NodePorts(inputs=frozenset({"left", "right"}), outputs=frozenset({"merged"})),
     "schema_validate": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"result"})),
+    "filter": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"pass", "fail"})),
+    "notification": NodePorts(inputs=frozenset({"message"}), outputs=frozenset({"status"})),
 }
 
 
@@ -199,5 +203,21 @@ NODE_SPECS: tuple[NodeSpec, ...] = (
         inputs=(("input", "any"),),
         outputs=(("result", "json"),),
         defaults={"schema_type": "required_keys", "required_keys": []},
+    ),
+    NodeSpec(
+        type="filter",
+        label="Filter",
+        executable=True,
+        inputs=(("input", "any"),),
+        outputs=(("pass", "any"), ("fail", "any")),
+        defaults={"field": "", "operator": "==", "value": ""},
+    ),
+    NodeSpec(
+        type="notification",
+        label="Notification",
+        executable=True,
+        inputs=(("message", "any"),),
+        outputs=(("status", "json"),),
+        defaults={"channel": "log", "target": "", "template": "{{input}}", "timeout_seconds": 10},
     ),
 )

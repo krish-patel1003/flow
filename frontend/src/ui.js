@@ -24,6 +24,8 @@ import { DataAggregationNode } from './nodes/DataAggregationNode';
 import { JsonExtractNode } from './nodes/JsonExtractNode';
 import { JoinMergeNode } from './nodes/JoinMergeNode';
 import { SchemaValidateNode } from './nodes/SchemaValidateNode';
+import { FilterNode } from './nodes/FilterNode';
+import { NotificationNode } from './nodes/NotificationNode';
 import { v1NodeRegistry } from './nodeRegistry';
 
 import ButtonEdge from './components/ButtonEdge';
@@ -46,6 +48,8 @@ const nodeTypes = {
   json_extract: JsonExtractNode,
   join_merge: JoinMergeNode,
   schema_validate: SchemaValidateNode,
+  filter: FilterNode,
+  notification: NotificationNode,
 };
 
 //getting state of the application
