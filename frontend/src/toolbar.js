@@ -41,6 +41,9 @@ export const PipelineToolbar = () => {
     llm: LLM,
     imageProcessing: ImageProcessing,
     dataAggregation: DataAggregation,
+    json_extract: Text,
+    join_merge: DataAggregation,
+    schema_validate: Conditional,
     customInput: Input,
     customOutput: Output,
   };

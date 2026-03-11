@@ -3,7 +3,7 @@
 - Local execution only
 - One machine
 - One run at a time (single-user)
-- `manual_trigger`, `file_source`, `python_transform`, `file_sink`, `text`, `math`, `conditional`, `api`, `llm`, `imageProcessing`, `dataAggregation`
+- `manual_trigger`, `file_source`, `python_transform`, `file_sink`, `text`, `math`, `conditional`, `api`, `llm`, `imageProcessing`, `dataAggregation`, `json_extract`, `join_merge`, `schema_validate`
 - Inline Python transform scripts (`transform(input_data)`)
 - Process-based execution with optional Dockerized local setup
 - Validation for schema, ports, DAG, and node config
@@ -25,6 +25,9 @@
 - `llm`: inputs `system`, `prompt`, outputs `response`
 - `imageProcessing`: inputs `image`, outputs `processed`
 - `dataAggregation`: inputs `data1`, `data2`, `data3`, outputs `aggregated`
+- `json_extract`: inputs `input`, outputs `value`
+- `join_merge`: inputs `left`, `right`, outputs `merged`
+- `schema_validate`: inputs `input`, outputs `result`
 
 ### Pipeline contract
 

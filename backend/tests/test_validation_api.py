@@ -240,3 +240,59 @@ def test_validate_pipeline_supports_llm_image_aggregation_nodes() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["valid"] is True
+
+
+def test_validate_pipeline_supports_json_extract_join_merge_schema_validate_nodes() -> None:
+    pipeline = {
+        "id": "pipe-v2",
+        "name": "v2 nodes",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "json_extract",
+                "position": {"x": 10, "y": 0},
+                "config": {"path": "user.name", "use_default": True, "default": "unknown"},
+            },
+            {
+                "id": "n3",
+                "type": "join_merge",
+                "position": {"x": 20, "y": 0},
+                "config": {"strategy": "concat"},
+            },
+            {
+                "id": "n4",
+                "type": "schema_validate",
+                "position": {"x": 30, "y": 0},
+                "config": {"schema_type": "type_check", "expected_type": "dict"},
+            },
+        ],
+        "edges": [
+            {
+                "id": "e1",
+                "source": {"node_id": "n1", "port": "start"},
+                "target": {"node_id": "n2", "port": "input"},
+            },
+            {
+                "id": "e2",
+                "source": {"node_id": "n2", "port": "value"},
+                "target": {"node_id": "n3", "port": "left"},
+            },
+            {
+                "id": "e3",
+                "source": {"node_id": "n1", "port": "start"},
+                "target": {"node_id": "n3", "port": "right"},
+            },
+            {
+                "id": "e4",
+                "source": {"node_id": "n3", "port": "merged"},
+                "target": {"node_id": "n4", "port": "input"},
+            },
+        ],
+    }
+
+    response = client.post("/pipelines/validate", json=pipeline)
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["valid"] is True

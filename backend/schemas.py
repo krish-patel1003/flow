@@ -125,6 +125,34 @@ class DataAggregationConfig(BaseModel):
     retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
 
 
+class JsonExtractConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str = ""
+    use_default: bool = False
+    default: Any = None
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class JoinMergeConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    strategy: Literal["object_merge", "concat", "zip"] = "object_merge"
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class SchemaValidateConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_type: Literal["required_keys", "type_check"] = "required_keys"
+    required_keys: List[str] = Field(default_factory=list)
+    expected_type: Literal["dict", "list", "string", "number", "boolean"] = "dict"
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
 NodeType = Literal[
     "manual_trigger",
     "file_source",
@@ -139,6 +167,9 @@ NodeType = Literal[
     "dataAggregation",
     "conditional",
     "api",
+    "json_extract",
+    "join_merge",
+    "schema_validate",
 ]
 
 
@@ -154,6 +185,9 @@ NodeConfig = Union[
     LLMConfig,
     ImageProcessingConfig,
     DataAggregationConfig,
+    JsonExtractConfig,
+    JoinMergeConfig,
+    SchemaValidateConfig,
     Dict[str, Any],
 ]
 

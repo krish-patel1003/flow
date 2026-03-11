@@ -15,6 +15,9 @@ Currently executable nodes:
 - `llm` (mock/echo)
 - `imageProcessing`
 - `dataAggregation`
+- `json_extract`
+- `join_merge`
+- `schema_validate`
 
 The UI still shows `customInput` and `customOutput` as "Coming soon".
 

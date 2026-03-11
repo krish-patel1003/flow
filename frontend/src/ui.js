@@ -21,6 +21,9 @@ import { APIRequestNode } from './nodes/APIRequestNode';
 import { LLMNode } from './nodes/LLMNode';
 import { ImageProcessingNode } from './nodes/ImageProcessingNode';
 import { DataAggregationNode } from './nodes/DataAggregationNode';
+import { JsonExtractNode } from './nodes/JsonExtractNode';
+import { JoinMergeNode } from './nodes/JoinMergeNode';
+import { SchemaValidateNode } from './nodes/SchemaValidateNode';
 import { v1NodeRegistry } from './nodeRegistry';
 
 import ButtonEdge from './components/ButtonEdge';
@@ -40,6 +43,9 @@ const nodeTypes = {
   llm: LLMNode,
   imageProcessing: ImageProcessingNode,
   dataAggregation: DataAggregationNode,
+  json_extract: JsonExtractNode,
+  join_merge: JoinMergeNode,
+  schema_validate: SchemaValidateNode,
 };
 
 //getting state of the application

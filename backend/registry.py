@@ -17,6 +17,9 @@ EXECUTABLE_NODE_TYPES: FrozenSet[str] = frozenset(
         "llm",
         "imageProcessing",
         "dataAggregation",
+        "json_extract",
+        "join_merge",
+        "schema_validate",
     }
 )
 
@@ -59,6 +62,9 @@ NODE_PORTS: Dict[str, NodePorts] = {
     "dataAggregation": NodePorts(
         inputs=frozenset({"data1", "data2", "data3"}), outputs=frozenset({"aggregated"})
     ),
+    "json_extract": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"value"})),
+    "join_merge": NodePorts(inputs=frozenset({"left", "right"}), outputs=frozenset({"merged"})),
+    "schema_validate": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"result"})),
 }
 
 
@@ -169,5 +175,29 @@ NODE_SPECS: tuple[NodeSpec, ...] = (
         inputs=(("data1", "any"), ("data2", "any"), ("data3", "any")),
         outputs=(("aggregated", "any"),),
         defaults={"aggregationType": "sum", "values": []},
+    ),
+    NodeSpec(
+        type="json_extract",
+        label="JSON Extract",
+        executable=True,
+        inputs=(("input", "json"),),
+        outputs=(("value", "any"),),
+        defaults={"path": "", "use_default": False, "default": None},
+    ),
+    NodeSpec(
+        type="join_merge",
+        label="Join Merge",
+        executable=True,
+        inputs=(("left", "any"), ("right", "any")),
+        outputs=(("merged", "any"),),
+        defaults={"strategy": "object_merge"},
+    ),
+    NodeSpec(
+        type="schema_validate",
+        label="Schema Validate",
+        executable=True,
+        inputs=(("input", "any"),),
+        outputs=(("result", "json"),),
+        defaults={"schema_type": "required_keys", "required_keys": []},
     ),
 )

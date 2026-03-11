@@ -117,6 +117,40 @@ export const v1NodeRegistry = {
       values: [],
     },
   },
+  json_extract: {
+    label: 'JSON Extract',
+    executable: true,
+    category: 'transform',
+    description: 'Extract a nested value from JSON using dot path.',
+    tags: ['json', 'extract', 'path'],
+    defaults: {
+      path: '',
+      use_default: false,
+      default: '',
+    },
+  },
+  join_merge: {
+    label: 'Join Merge',
+    executable: true,
+    category: 'transform',
+    description: 'Merge two inputs by object merge, concat, or zip.',
+    tags: ['merge', 'join', 'concat'],
+    defaults: {
+      strategy: 'object_merge',
+    },
+  },
+  schema_validate: {
+    label: 'Schema Validate',
+    executable: true,
+    category: 'routing',
+    description: 'Validate payload shape and return validity report.',
+    tags: ['validate', 'schema', 'guardrail'],
+    defaults: {
+      schema_type: 'required_keys',
+      required_keys: [],
+      expected_type: 'dict',
+    },
+  },
 };
 
 export const comingSoonNodes = [

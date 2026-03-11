@@ -18,6 +18,9 @@ from .schemas import (
     MathConfig,
     Pipeline,
     PythonTransformConfig,
+    JsonExtractConfig,
+    JoinMergeConfig,
+    SchemaValidateConfig,
     TextConfig,
 )
 
@@ -64,6 +67,15 @@ def _validate_node_config(node_type: str, config: dict, node_id: str) -> list[Er
             return []
         if node_type == "dataAggregation":
             DataAggregationConfig.model_validate(config)
+            return []
+        if node_type == "json_extract":
+            JsonExtractConfig.model_validate(config)
+            return []
+        if node_type == "join_merge":
+            JoinMergeConfig.model_validate(config)
+            return []
+        if node_type == "schema_validate":
+            SchemaValidateConfig.model_validate(config)
             return []
     except ValidationError as exc:
         first = exc.errors()[0]
