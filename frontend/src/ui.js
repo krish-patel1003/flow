@@ -54,6 +54,7 @@ const selector = (state) => ({
   selectedEdge: state.selectedEdge,
   setSelectedEdge: state.setSelectedEdge,
   deleteEdge: state.deleteEdge,
+  setSelectedNodeId: state.setSelectedNodeId,
 });
 
 const PipelineUIContent = () => {
@@ -74,7 +75,8 @@ const PipelineUIContent = () => {
     onConnect, 
     selectedEdge,
     setSelectedEdge,
-    deleteEdge
+    deleteEdge,
+    setSelectedNodeId,
   } = useStore(selector, shallow);
 
   const getInitNodeData = (nodeID, type) => {
@@ -147,7 +149,13 @@ const PipelineUIContent = () => {
   //If click on panel reset selection
   const onPaneClick = useCallback(() => {
     setSelectedEdge(null);
-  }, [setSelectedEdge]);
+    setSelectedNodeId(null);
+  }, [setSelectedEdge, setSelectedNodeId]);
+
+  const onNodeClick = useCallback((event, node) => {
+    event.stopPropagation();
+    setSelectedNodeId(node.id);
+  }, [setSelectedNodeId]);
 
 
   //Types of edges(Here there is only one type)
@@ -165,7 +173,7 @@ const PipelineUIContent = () => {
   
 
   return (
-    <div ref={reactFlowWrapper} style={{width: '100vw', height: '100vh'}}>
+    <div ref={reactFlowWrapper} style={{width: '100%', height: '100%'}}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -175,6 +183,7 @@ const PipelineUIContent = () => {
         onDrop={onDrop}
         onDragOver={onDragOver}
         onEdgeClick={onEdgeClick}
+        onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
@@ -185,7 +194,7 @@ const PipelineUIContent = () => {
       >
         <Background color="#aaa" gap={gridSize} />
         <Controls />
-        <MiniMap />
+        <MiniMap pannable zoomable />
       </ReactFlow>
     </div>
   );

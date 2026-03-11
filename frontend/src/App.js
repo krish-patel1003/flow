@@ -1,13 +1,18 @@
 import { PipelineToolbar } from './toolbar';
 import { PipelineUI } from './ui';
 import { RunMonitor } from './runMonitor';
+import { InspectorPanel } from './inspectorPanel';
+import './appLayout.css';
 
 
 function App() {
   return (
-    <div>
+    <div className="app-shell">
       <PipelineToolbar />
-      <PipelineUI />
+      <div className="canvas-pane">
+        <PipelineUI />
+      </div>
+      <InspectorPanel />
       <RunMonitor />
     </div>
   );

@@ -1,8 +1,14 @@
 .submit-button{
-    background-color: #6366F1;
+    background-color: #0d5a8f;
     color: white;
     padding: 10px;
     border-radius: 10px;
     border: none;
     z-index: 2;
+    cursor: pointer;
   }
+
+.submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

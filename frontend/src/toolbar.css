@@ -1,11 +1,93 @@
-.toolbar{
-    position: absolute;
-    z-index: 30;
-    padding: 10px;
-    display: flex;
-    justify-content: flex-start;
-    gap: 10px;
-    width: calc(100% - 24px);
-    flex-wrap: wrap;
-  
-  }
+.toolbar {
+  border-right: 1px solid #d4dde8;
+  background: #f6f9fc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.toolbar-head h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #15324b;
+}
+
+.toolbar-head p {
+  margin-top: 4px;
+  color: #53708b;
+  font-size: 12px;
+}
+
+.toolbar-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.toolbar-controls select,
+.toolbar-controls button,
+.toolbar input[type='search'] {
+  width: 100%;
+}
+
+.category-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.category-row button {
+  border: 1px solid #b8c8d8;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #284a66;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.category-row button.active {
+  border-color: #0d5a8f;
+  background: #0d5a8f;
+  color: #ffffff;
+}
+
+.component-list {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.component-item {
+  border: 1px solid #d4dde8;
+  border-radius: 10px;
+  padding: 8px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.add-node-button {
+  align-self: flex-end;
+  border: 1px solid #b9c9d8;
+  border-radius: 6px;
+  background: #ecf3f9;
+  color: #1f4463;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.add-node-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.component-item small {
+  color: #57738d;
+  font-size: 11px;
+}

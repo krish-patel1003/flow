@@ -10,7 +10,16 @@ export const useStore = create((set, get) => ({
   nodes: [],
   edges: [],
   selectedEdge: null,
+  selectedNodeId: null,
   nodeIDs: {},
+  uiMode: 'beginner',
+  librarySearch: '',
+  activeLibraryCategory: 'all',
+  inspectorTab: 'config',
+  activeBottomTab: 'runs',
+  bottomPanelOpen: true,
+  tourSeen: false,
+  tourRunning: false,
   currentRunId: null,
   runStatus: null,
   runNodeStates: {},
@@ -28,6 +37,7 @@ export const useStore = create((set, get) => ({
   addNode: (node) => {
     set({
       nodes: [...get().nodes, node],
+      selectedNodeId: node.id,
     });
   },
   onNodesChange: (changes) => {
@@ -81,6 +91,30 @@ export const useStore = create((set, get) => ({
       selectedEdge: null,
     });
   },
+  setSelectedNodeId: (nodeId) => {
+    set({ selectedNodeId: nodeId });
+  },
+  setLibrarySearch: (value) => {
+    set({ librarySearch: value });
+  },
+  setActiveLibraryCategory: (value) => {
+    set({ activeLibraryCategory: value });
+  },
+  setInspectorTab: (value) => {
+    set({ inspectorTab: value });
+  },
+  setActiveBottomTab: (value) => {
+    set({ activeBottomTab: value });
+  },
+  setBottomPanelOpen: (value) => {
+    set({ bottomPanelOpen: value });
+  },
+  setTourSeen: (value) => {
+    set({ tourSeen: value });
+  },
+  setTourRunning: (value) => {
+    set({ tourRunning: value });
+  },
   loadGraph: (nodes, edges) => {
     const nextNodeIDs = {};
     nodes.forEach((node) => {
@@ -96,6 +130,7 @@ export const useStore = create((set, get) => ({
       edges,
       nodeIDs: nextNodeIDs,
       selectedEdge: null,
+      selectedNodeId: null,
     });
   },
   setCurrentRun: (runId) => {

@@ -1,0 +1,66 @@
+.inspector-panel {
+  border-left: 1px solid #d4dde8;
+  background: #fbfdff;
+  padding: 12px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inspector-panel h2 {
+  margin: 0;
+  color: #17334a;
+}
+
+.inspector-panel h3 {
+  color: #244d6d;
+}
+
+.inspector-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  border: 1px solid #afc2d4;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: #1f4e73;
+  background: #edf4fa;
+}
+
+.pill.muted {
+  color: #5f788f;
+  background: #f4f8fb;
+}
+
+.inspector-section {
+  border: 1px solid #d9e1ea;
+  border-radius: 10px;
+  padding: 10px;
+  background: #ffffff;
+}
+
+.inspector-section h4 {
+  margin-bottom: 6px;
+  color: #1f4460;
+}
+
+.inspector-section pre {
+  background: #0f1c29;
+  color: #d3ebff;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12px;
+  overflow: auto;
+}
+
+.inspector-help-card {
+  border: 1px dashed #bfd1e1;
+  border-radius: 10px;
+  padding: 10px;
+  background: #ffffff;
+}
