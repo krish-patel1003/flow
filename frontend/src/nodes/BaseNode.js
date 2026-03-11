@@ -16,13 +16,12 @@ export const BaseNode = ({
 }) => {
   
   const selector = (state) => ({
-    nodes: state.nodes,
     edges: state.edges,
-    
+    setSelectedNodeId: state.setSelectedNodeId,
   });
   const { 
-    
     edges, 
+    setSelectedNodeId,
   } = useStore(selector, shallow);
   const { getEdges, setNodes, setEdges } = useReactFlow();
   const [isConfirming, setIsConfirming] = useState(false);
@@ -46,11 +45,13 @@ export const BaseNode = ({
   // Handle click on the node
   const handleNodeClick = useCallback((event) => {
     event.stopPropagation(); // Prevent click from propagating to the document
+    setSelectedNodeId(id);
     if (deleteButtonRef.current.contains(event.target)) {
       if (isConfirming) {
         // Perform deletion
         setNodes((nds) => nds.filter((node) => node.id !== id));
         setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+        setSelectedNodeId(null);
         setIsConfirming(false); // Reset confirmation state
       } else {
         setIsConfirming(true); // Set confirmation state
@@ -58,7 +59,7 @@ export const BaseNode = ({
     } else {
       setIsConfirming(false);
     }
-  }, [isConfirming, id, setNodes, setEdges]);
+  }, [isConfirming, id, setEdges, setNodes, setSelectedNodeId]);
 
   // Handle click outside the delete button or node
   const handleClickOutside = useCallback((event) => {
@@ -87,6 +88,7 @@ export const BaseNode = ({
       // Perform deletion
       setNodes((nds) => nds.filter((node) => node.id !== id));
       setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+      setSelectedNodeId(null);
       setIsConfirming(false); // Reset confirmation state
     } else {
       setIsConfirming(true); // Set confirmation state

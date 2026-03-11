@@ -168,7 +168,6 @@ const PipelineUIContent = () => {
 
   const onSelectionChange = useCallback(({ nodes: selectedNodes }) => {
     if (!selectedNodes || selectedNodes.length === 0) {
-      setSelectedNodeId(null);
       return;
     }
     setSelectedNodeId(selectedNodes[0].id);
