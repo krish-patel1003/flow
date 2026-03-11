@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useStore } from './store';
 import './runMonitor.css';
+import { getApiBase } from './apiBase';
 
 const terminalStatuses = new Set(['succeeded', 'failed', 'cancelled']);
 
@@ -30,7 +31,7 @@ export const RunMonitor = () => {
     setRunLog: state.setRunLog,
   }));
 
-  const baseUrl = process.env.REACT_APP_API_BASE || 'http://127.0.0.1:8000';
+  const baseUrl = getApiBase();
 
   const refreshStatus = useCallback(async () => {
     if (!currentRunId) {

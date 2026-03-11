@@ -2,6 +2,7 @@ import { useStore } from "./store";
 import { useState } from "react";
 import "./submitButton.css";
 import { serializePipeline } from './pipelineSerializer';
+import { getApiBase } from './apiBase';
 
 export const SubmitPipelineButton = () => {
   const { nodes, edges, setCurrentRun, setRunError } = useStore((state) => ({
@@ -18,7 +19,7 @@ export const SubmitPipelineButton = () => {
     if (isSubmitting) return; // Prevent multiple clicks
     setIsSubmitting(true); // Disable button
 
-    const baseUrl = process.env.REACT_APP_API_BASE || 'http://127.0.0.1:8000';
+    const baseUrl = getApiBase();
     const pipeline = serializePipeline({
       id: 'pipeline-demo',
       name: 'Pipeline Demo',
