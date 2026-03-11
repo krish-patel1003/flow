@@ -1,0 +1,11 @@
+{
+  "valid": true,
+  "errors": [],
+  "value": {
+    "invoice_id": "inv-1049",
+    "vendor": "Northwind Services",
+    "amount": 1299.5,
+    "currency": "USD",
+    "due_date": "2026-03-15"
+  }
+}

@@ -1,14 +1,19 @@
 import { PipelineToolbar } from './toolbar';
 import { PipelineUI } from './ui';
-import { RunMonitor } from './runMonitor';
+import { RightPane } from './rightPane';
+import { OnboardingTour } from './onboardingTour';
+import './appLayout.css';
 
 
 function App() {
   return (
-    <div>
+    <div className="app-shell">
       <PipelineToolbar />
-      <PipelineUI />
-      <RunMonitor />
+      <div className="canvas-pane">
+        <PipelineUI />
+      </div>
+      <RightPane />
+      <OnboardingTour />
     </div>
   );
 }

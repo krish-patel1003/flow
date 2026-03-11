@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib import error as urlerror
 from urllib import parse as urlparse
@@ -14,6 +15,34 @@ from .safe_exec import run_transform_script
 
 def execute_manual_trigger(node_config: dict, incoming_data):
     return incoming_data
+
+
+def execute_scheduler_trigger(node_config: dict, incoming_data):
+    if not node_config.get("enabled", True):
+        return {
+            "triggered": False,
+            "reason": "disabled",
+            "cron": node_config.get("cron", ""),
+            "timezone": node_config.get("timezone", "UTC"),
+        }
+    return {
+        "triggered": True,
+        "cron": node_config.get("cron", ""),
+        "timezone": node_config.get("timezone", "UTC"),
+        "triggered_at": datetime.now(UTC).isoformat(),
+    }
+
+
+def execute_webhook_trigger(node_config: dict, incoming_data):
+    sample_payload = node_config.get("sample_payload", {})
+    if incoming_data is not None:
+        return incoming_data
+    return {
+        "source": "webhook_trigger",
+        "path": node_config.get("path", "/hooks/default"),
+        "method": node_config.get("method", "POST"),
+        "payload": sample_payload,
+    }
 
 
 def execute_file_source(node_config: dict, incoming_data):
@@ -245,3 +274,200 @@ def execute_image_processing(node_config: dict, incoming_data):
         processed.save(output_path)
 
     return {"path": str(output_path), "operation": operation}
+
+
+def execute_json_extract(node_config: dict, incoming_data):
+    path = str(node_config.get("path", "")).strip()
+    use_default = bool(node_config.get("use_default", False))
+    default_value = node_config.get("default")
+
+    data = incoming_data
+    if isinstance(incoming_data, str):
+        body = incoming_data.strip()
+        if body.startswith("{") or body.startswith("["):
+            data = json.loads(body)
+
+    if not path:
+        return data
+
+    current = data
+    for segment in [part for part in path.split(".") if part]:
+        if isinstance(current, dict):
+            if segment not in current:
+                if use_default:
+                    return default_value
+                raise ValueError(f"Path '{path}' not found (missing key '{segment}')")
+            current = current[segment]
+            continue
+        if isinstance(current, list):
+            if not segment.isdigit():
+                if use_default:
+                    return default_value
+                raise ValueError(f"Path '{path}' expected numeric index at '{segment}'")
+            index = int(segment)
+            if index < 0 or index >= len(current):
+                if use_default:
+                    return default_value
+                raise ValueError(f"Path '{path}' index out of range: {segment}")
+            current = current[index]
+            continue
+
+        if use_default:
+            return default_value
+        raise ValueError(f"Path '{path}' cannot continue at segment '{segment}'")
+
+    return current
+
+
+def execute_join_merge(node_config: dict, incoming_data):
+    strategy = node_config.get("strategy", "object_merge")
+    values = incoming_data if isinstance(incoming_data, list) else [incoming_data]
+
+    if strategy == "object_merge":
+        merged: dict = {}
+        for value in values:
+            if value is None:
+                continue
+            if not isinstance(value, dict):
+                raise ValueError("join_merge with object_merge strategy requires dict inputs")
+            merged.update(value)
+        return merged
+
+    if strategy == "concat":
+        if all(isinstance(value, list) for value in values if value is not None):
+            merged_list = []
+            for value in values:
+                if value is not None:
+                    merged_list.extend(value)
+            return merged_list
+        return "".join("" if value is None else str(value) for value in values)
+
+    if strategy == "zip":
+        sequences = []
+        for value in values:
+            if not isinstance(value, list):
+                raise ValueError("join_merge with zip strategy requires list inputs")
+            sequences.append(value)
+        return [list(item) for item in zip(*sequences)]
+
+    raise ValueError(f"Unsupported join_merge strategy: {strategy}")
+
+
+def execute_schema_validate(node_config: dict, incoming_data):
+    schema_type = node_config.get("schema_type", "required_keys")
+    errors = []
+
+    if schema_type == "required_keys":
+        required_keys = node_config.get("required_keys", [])
+        if not isinstance(incoming_data, dict):
+            errors.append("Input must be an object/dict")
+        else:
+            for key in required_keys:
+                if key not in incoming_data:
+                    errors.append(f"Missing key: {key}")
+    elif schema_type == "type_check":
+        expected_type = node_config.get("expected_type", "dict")
+        mapping = {
+            "dict": dict,
+            "list": list,
+            "string": str,
+            "number": (int, float),
+            "boolean": bool,
+        }
+        py_type = mapping.get(expected_type)
+        if py_type is None:
+            errors.append(f"Unknown expected_type: {expected_type}")
+        elif not isinstance(incoming_data, py_type):
+            errors.append(f"Expected type '{expected_type}'")
+    else:
+        errors.append(f"Unsupported schema_type: {schema_type}")
+
+    return {
+        "valid": len(errors) == 0,
+        "errors": errors,
+        "value": incoming_data,
+    }
+
+
+def execute_filter(node_config: dict, incoming_data):
+    field = str(node_config.get("field", "")).strip()
+    operator = node_config.get("operator", "==")
+    expected = node_config.get("value")
+
+    left = incoming_data
+    if field:
+        if isinstance(incoming_data, dict):
+            left = incoming_data.get(field)
+        else:
+            left = None
+
+    matched = False
+
+    def as_float(value):
+        if value is None:
+            raise ValueError("Filter comparison requires numeric values")
+        return float(value)
+
+    if operator == "==":
+        matched = left == expected
+    elif operator == "!=":
+        matched = left != expected
+    elif operator == ">":
+        matched = as_float(left) > as_float(expected)
+    elif operator == "<":
+        matched = as_float(left) < as_float(expected)
+    elif operator == ">=":
+        matched = as_float(left) >= as_float(expected)
+    elif operator == "<=":
+        matched = as_float(left) <= as_float(expected)
+    elif operator == "contains":
+        matched = str(expected) in str(left)
+    else:
+        raise ValueError(f"Unsupported filter operator: {operator}")
+
+    return {
+        "matched": matched,
+        "pass": incoming_data if matched else None,
+        "fail": incoming_data if not matched else None,
+    }
+
+
+def execute_notification(node_config: dict, incoming_data):
+    channel = node_config.get("channel", "log")
+    target = str(node_config.get("target", "")).strip()
+    template = str(node_config.get("template", "{{input}}"))
+    timeout = int(node_config.get("timeout_seconds", 10))
+
+    message = template
+    if isinstance(incoming_data, dict):
+        for key, value in incoming_data.items():
+            message = message.replace(f"{{{{{key}}}}}", str(value))
+    message = message.replace("{{input}}", "" if incoming_data is None else str(incoming_data))
+
+    if channel == "log":
+        return {"status": "sent", "channel": "log", "message": message}
+
+    if channel == "webhook":
+        if not target:
+            raise ValueError("notification target is required for webhook channel")
+        payload = {"message": message, "payload": incoming_data}
+        req = urlrequest.Request(
+            url=target,
+            method="POST",
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(payload).encode("utf-8"),
+        )
+        try:
+            with urlrequest.urlopen(req, timeout=timeout) as response:
+                body = response.read().decode("utf-8")
+                return {
+                    "status": "sent",
+                    "channel": "webhook",
+                    "target": target,
+                    "response_status": response.status,
+                    "response_body": body,
+                }
+        except urlerror.URLError as exc:
+            raise RuntimeError(f"Notification webhook failed: {exc.reason}") from exc
+
+    raise ValueError(f"Unsupported notification channel: {channel}")

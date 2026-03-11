@@ -13,27 +13,33 @@ from .schemas import (
     ErrorDetail,
     FileSinkConfig,
     FileSourceConfig,
+    FilterConfig,
     ImageProcessingConfig,
     LLMConfig,
+    ManualTriggerConfig,
     MathConfig,
+    NotificationConfig,
     Pipeline,
     PythonTransformConfig,
+    JsonExtractConfig,
+    SchedulerTriggerConfig,
+    JoinMergeConfig,
+    SchemaValidateConfig,
     TextConfig,
+    WebhookTriggerConfig,
 )
 
 
 def _validate_node_config(node_type: str, config: dict, node_id: str) -> list[ErrorDetail]:
     try:
         if node_type == "manual_trigger":
-            if config:
-                return [
-                    ErrorDetail(
-                        code="invalid_node_config",
-                        message="manual_trigger does not accept config",
-                        node_id=node_id,
-                        field="config",
-                    )
-                ]
+            ManualTriggerConfig.model_validate(config)
+            return []
+        if node_type == "scheduler_trigger":
+            SchedulerTriggerConfig.model_validate(config)
+            return []
+        if node_type == "webhook_trigger":
+            WebhookTriggerConfig.model_validate(config)
             return []
         if node_type == "file_source":
             FileSourceConfig.model_validate(config)
@@ -64,6 +70,21 @@ def _validate_node_config(node_type: str, config: dict, node_id: str) -> list[Er
             return []
         if node_type == "dataAggregation":
             DataAggregationConfig.model_validate(config)
+            return []
+        if node_type == "json_extract":
+            JsonExtractConfig.model_validate(config)
+            return []
+        if node_type == "join_merge":
+            JoinMergeConfig.model_validate(config)
+            return []
+        if node_type == "schema_validate":
+            SchemaValidateConfig.model_validate(config)
+            return []
+        if node_type == "filter":
+            FilterConfig.model_validate(config)
+            return []
+        if node_type == "notification":
+            NotificationConfig.model_validate(config)
             return []
     except ValidationError as exc:
         first = exc.errors()[0]

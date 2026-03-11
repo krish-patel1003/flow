@@ -21,6 +21,13 @@ import { APIRequestNode } from './nodes/APIRequestNode';
 import { LLMNode } from './nodes/LLMNode';
 import { ImageProcessingNode } from './nodes/ImageProcessingNode';
 import { DataAggregationNode } from './nodes/DataAggregationNode';
+import { SchedulerTriggerNode } from './nodes/SchedulerTriggerNode';
+import { WebhookTriggerNode } from './nodes/WebhookTriggerNode';
+import { JsonExtractNode } from './nodes/JsonExtractNode';
+import { JoinMergeNode } from './nodes/JoinMergeNode';
+import { SchemaValidateNode } from './nodes/SchemaValidateNode';
+import { FilterNode } from './nodes/FilterNode';
+import { NotificationNode } from './nodes/NotificationNode';
 import { v1NodeRegistry } from './nodeRegistry';
 
 import ButtonEdge from './components/ButtonEdge';
@@ -30,6 +37,8 @@ const proOptions = { hideAttribution: true };
 //Types of Node
 const nodeTypes = {
   manual_trigger: ManualTriggerNode,
+  scheduler_trigger: SchedulerTriggerNode,
+  webhook_trigger: WebhookTriggerNode,
   file_source: FileSourceNode,
   python_transform: PythonTransformNode,
   file_sink: FileSinkNode,
@@ -40,6 +49,11 @@ const nodeTypes = {
   llm: LLMNode,
   imageProcessing: ImageProcessingNode,
   dataAggregation: DataAggregationNode,
+  json_extract: JsonExtractNode,
+  join_merge: JoinMergeNode,
+  schema_validate: SchemaValidateNode,
+  filter: FilterNode,
+  notification: NotificationNode,
 };
 
 //getting state of the application
@@ -54,6 +68,7 @@ const selector = (state) => ({
   selectedEdge: state.selectedEdge,
   setSelectedEdge: state.setSelectedEdge,
   deleteEdge: state.deleteEdge,
+  setSelectedNodeId: state.setSelectedNodeId,
 });
 
 const PipelineUIContent = () => {
@@ -74,7 +89,8 @@ const PipelineUIContent = () => {
     onConnect, 
     selectedEdge,
     setSelectedEdge,
-    deleteEdge
+    deleteEdge,
+    setSelectedNodeId,
   } = useStore(selector, shallow);
 
   const getInitNodeData = (nodeID, type) => {
@@ -147,7 +163,15 @@ const PipelineUIContent = () => {
   //If click on panel reset selection
   const onPaneClick = useCallback(() => {
     setSelectedEdge(null);
-  }, [setSelectedEdge]);
+    setSelectedNodeId(null);
+  }, [setSelectedEdge, setSelectedNodeId]);
+
+  const onSelectionChange = useCallback(({ nodes: selectedNodes }) => {
+    if (!selectedNodes || selectedNodes.length === 0) {
+      return;
+    }
+    setSelectedNodeId(selectedNodes[0].id);
+  }, [setSelectedNodeId]);
 
 
   //Types of edges(Here there is only one type)
@@ -165,7 +189,7 @@ const PipelineUIContent = () => {
   
 
   return (
-    <div ref={reactFlowWrapper} style={{width: '100vw', height: '100vh'}}>
+    <div ref={reactFlowWrapper} style={{width: '100%', height: '100%'}}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -176,6 +200,7 @@ const PipelineUIContent = () => {
         onDragOver={onDragOver}
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
+        onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         proOptions={proOptions}
@@ -185,7 +210,7 @@ const PipelineUIContent = () => {
       >
         <Background color="#aaa" gap={gridSize} />
         <Controls />
-        <MiniMap />
+        <MiniMap pannable zoomable />
       </ReactFlow>
     </div>
   );

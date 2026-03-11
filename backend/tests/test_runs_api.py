@@ -423,3 +423,263 @@ def test_get_file_sink_output_preview_missing_node_artifact(tmp_path: Path, monk
 
     preview = client.get(f"/runs/{run_id}/outputs/n3")
     assert preview.status_code == 404
+
+
+def test_run_pipeline_json_extract_to_file_sink(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    input_file = tmp_path / "payload.json"
+    input_file.write_text('{"user":{"name":"Ada"}}')
+    output_file = tmp_path / "name.txt"
+
+    pipeline = {
+        "id": "pipe-json-extract",
+        "name": "JSON Extract",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "file_source",
+                "position": {"x": 10, "y": 0},
+                "config": {"path": str(input_file), "mode": "json"},
+            },
+            {
+                "id": "n3",
+                "type": "json_extract",
+                "position": {"x": 20, "y": 0},
+                "config": {"path": "user.name"},
+            },
+            {
+                "id": "n4",
+                "type": "file_sink",
+                "position": {"x": 30, "y": 0},
+                "config": {"path": str(output_file), "mode": "text"},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n2", "port": "trigger"}},
+            {"id": "e2", "source": {"node_id": "n2", "port": "data"}, "target": {"node_id": "n3", "port": "input"}},
+            {"id": "e3", "source": {"node_id": "n3", "port": "value"}, "target": {"node_id": "n4", "port": "input"}},
+        ],
+    }
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+    assert output_file.read_text() == "Ada"
+
+
+def test_run_pipeline_join_merge_and_schema_validate(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    output_file = tmp_path / "result.json"
+
+    pipeline = {
+        "id": "pipe-merge-validate",
+        "name": "Join and validate",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "python_transform",
+                "position": {"x": 10, "y": 0},
+                "config": {"script": "def transform(input_data):\n    return {'first': 'Ada'}"},
+            },
+            {
+                "id": "n3",
+                "type": "python_transform",
+                "position": {"x": 10, "y": 20},
+                "config": {"script": "def transform(input_data):\n    return {'last': 'Lovelace'}"},
+            },
+            {
+                "id": "n4",
+                "type": "join_merge",
+                "position": {"x": 20, "y": 0},
+                "config": {"strategy": "object_merge"},
+            },
+            {
+                "id": "n5",
+                "type": "schema_validate",
+                "position": {"x": 30, "y": 0},
+                "config": {"schema_type": "required_keys", "required_keys": ["first", "last"]},
+            },
+            {
+                "id": "n6",
+                "type": "file_sink",
+                "position": {"x": 40, "y": 0},
+                "config": {"path": str(output_file), "mode": "json"},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n2", "port": "input"}},
+            {"id": "e2", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n3", "port": "input"}},
+            {"id": "e3", "source": {"node_id": "n2", "port": "output"}, "target": {"node_id": "n4", "port": "left"}},
+            {"id": "e4", "source": {"node_id": "n3", "port": "output"}, "target": {"node_id": "n4", "port": "right"}},
+            {"id": "e5", "source": {"node_id": "n4", "port": "merged"}, "target": {"node_id": "n5", "port": "input"}},
+            {"id": "e6", "source": {"node_id": "n5", "port": "result"}, "target": {"node_id": "n6", "port": "input"}},
+        ],
+    }
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+
+    payload = json.loads(output_file.read_text())
+    assert payload["valid"] is True
+    assert payload["value"]["first"] == "Ada"
+    assert payload["value"]["last"] == "Lovelace"
+
+
+def test_run_pipeline_filter_node_outputs_match_payload(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    output_file = tmp_path / "filter_result.json"
+    pipeline = {
+        "id": "pipe-filter",
+        "name": "Filter",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "python_transform",
+                "position": {"x": 10, "y": 0},
+                "config": {"script": "def transform(input_data):\n    return {'score': 91, 'name': 'Ada'}"},
+            },
+            {
+                "id": "n3",
+                "type": "filter",
+                "position": {"x": 20, "y": 0},
+                "config": {"field": "score", "operator": ">=", "value": 80},
+            },
+            {
+                "id": "n4",
+                "type": "file_sink",
+                "position": {"x": 30, "y": 0},
+                "config": {"path": str(output_file), "mode": "json"},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n2", "port": "input"}},
+            {"id": "e2", "source": {"node_id": "n2", "port": "output"}, "target": {"node_id": "n3", "port": "input"}},
+            {"id": "e3", "source": {"node_id": "n3", "port": "pass"}, "target": {"node_id": "n4", "port": "input"}},
+        ],
+    }
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+
+    payload = json.loads(output_file.read_text())
+    assert payload["matched"] is True
+    assert payload["pass"]["name"] == "Ada"
+
+
+def test_run_pipeline_notification_log_channel(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    output_file = tmp_path / "notify_result.json"
+    pipeline = {
+        "id": "pipe-notify",
+        "name": "Notification",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "notification",
+                "position": {"x": 10, "y": 0},
+                "config": {"channel": "log", "template": "hello {{input}}"},
+            },
+            {
+                "id": "n3",
+                "type": "file_sink",
+                "position": {"x": 20, "y": 0},
+                "config": {"path": str(output_file), "mode": "json"},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n2", "port": "message"}},
+            {"id": "e2", "source": {"node_id": "n2", "port": "status"}, "target": {"node_id": "n3", "port": "input"}},
+        ],
+    }
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+
+    payload = json.loads(output_file.read_text())
+    assert payload["status"] == "sent"
+    assert payload["channel"] == "log"
+
+
+def test_run_pipeline_scheduler_and_webhook_triggers(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    output_file = tmp_path / "trigger_payload.json"
+    pipeline = {
+        "id": "pipe-triggers",
+        "name": "Triggers pipeline",
+        "version": "v1",
+        "nodes": [
+            {
+                "id": "n1",
+                "type": "scheduler_trigger",
+                "position": {"x": 0, "y": 0},
+                "config": {"cron": "0 * * * *", "timezone": "UTC", "enabled": True},
+            },
+            {
+                "id": "n2",
+                "type": "webhook_trigger",
+                "position": {"x": 0, "y": 40},
+                "config": {
+                    "path": "/hooks/demo",
+                    "method": "POST",
+                    "sample_payload": {"customer": "Ada", "priority": "high"},
+                },
+            },
+            {
+                "id": "n3",
+                "type": "join_merge",
+                "position": {"x": 20, "y": 20},
+                "config": {"strategy": "object_merge"},
+            },
+            {
+                "id": "n4",
+                "type": "file_sink",
+                "position": {"x": 40, "y": 20},
+                "config": {"path": str(output_file), "mode": "json"},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n3", "port": "left"}},
+            {"id": "e2", "source": {"node_id": "n2", "port": "payload"}, "target": {"node_id": "n3", "port": "right"}},
+            {"id": "e3", "source": {"node_id": "n3", "port": "merged"}, "target": {"node_id": "n4", "port": "input"}},
+        ],
+    }
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+
+    payload = json.loads(output_file.read_text())
+    assert payload["source"] == "webhook_trigger"
+    assert payload["payload"]["customer"] == "Ada"
+    assert payload["triggered"] is True

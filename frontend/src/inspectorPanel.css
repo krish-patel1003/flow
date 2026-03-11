@@ -1,0 +1,108 @@
+.inspector-panel {
+  background: transparent;
+  height: 100%;
+  padding: 12px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inspector-panel h2 {
+  margin: 0;
+  color: #17334a;
+}
+
+.inspector-panel h3 {
+  color: #244d6d;
+}
+
+.inspector-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.inspector-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.inspector-tabs button {
+  border: 1px solid #b7cadb;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #2a4d67;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.inspector-tabs button.active {
+  background: #0d5a8f;
+  border-color: #0d5a8f;
+  color: #ffffff;
+}
+
+.pill {
+  border: 1px solid #afc2d4;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: #1f4e73;
+  background: #edf4fa;
+}
+
+.pill.muted {
+  color: #5f788f;
+  background: #f4f8fb;
+}
+
+.inspector-section {
+  border: 1px solid #d9e1ea;
+  border-radius: 10px;
+  padding: 10px;
+  background: #ffffff;
+}
+
+.inspector-section h4 {
+  margin-bottom: 6px;
+  color: #1f4460;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.inspector-section pre {
+  background: #0f1c29;
+  color: #d3ebff;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12px;
+  overflow: auto;
+}
+
+.inspector-help-card {
+  border: 1px dashed #bfd1e1;
+  border-radius: 10px;
+  padding: 10px;
+  background: #ffffff;
+}
+
+.advanced-settings {
+  margin-top: 8px;
+  border-top: 1px solid #e3ecf3;
+  padding-top: 8px;
+}
+
+.inline-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inspector-empty {
+  color: #506d85;
+}

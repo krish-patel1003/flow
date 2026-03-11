@@ -337,4 +337,314 @@ export const demoPipelines = [
       edge('e5', 'python_transform-3', 'output', 'file_sink-1', 'input'),
     ],
   },
+  {
+    id: 'scheduled-ops-heartbeat',
+    label: 'Scheduled Ops Heartbeat',
+    description: 'Hourly schedule -> API health check -> notify + audit file',
+    nodes: [
+      {
+        id: 'scheduler_trigger-1',
+        type: 'scheduler_trigger',
+        position: { x: 80, y: 220 },
+        data: { config: { cron: '0 * * * *', timezone: 'UTC', enabled: true } },
+      },
+      {
+        id: 'api-1',
+        type: 'api',
+        position: { x: 300, y: 220 },
+        data: {
+          config: {
+            method: 'GET',
+            url: 'https://httpbin.org/get',
+            timeout_seconds: 15,
+          },
+        },
+      },
+      {
+        id: 'json_extract-1',
+        type: 'json_extract',
+        position: { x: 520, y: 220 },
+        data: { config: { path: 'url', use_default: true, default: 'missing-url' } },
+      },
+      {
+        id: 'notification-1',
+        type: 'notification',
+        position: { x: 740, y: 140 },
+        data: {
+          config: {
+            channel: 'log',
+            template: 'Ops heartbeat check completed for endpoint {{input}}',
+          },
+        },
+      },
+      {
+        id: 'file_sink-1',
+        type: 'file_sink',
+        position: { x: 740, y: 300 },
+        data: { config: { path: 'backend/.runs/demo/ops-heartbeat.json', mode: 'json' } },
+      },
+    ],
+    edges: [
+      edge('e1', 'scheduler_trigger-1', 'start', 'api-1', 'payload'),
+      edge('e2', 'api-1', 'response', 'json_extract-1', 'input'),
+      edge('e3', 'json_extract-1', 'value', 'notification-1', 'message'),
+      edge('e4', 'api-1', 'response', 'file_sink-1', 'input'),
+    ],
+  },
+  {
+    id: 'webhook-lead-qualification',
+    label: 'Webhook Lead Qualification',
+    description: 'Webhook lead payload -> score filter -> sales alert + CRM queue file',
+    nodes: [
+      {
+        id: 'webhook_trigger-1',
+        type: 'webhook_trigger',
+        position: { x: 80, y: 220 },
+        data: {
+          config: {
+            path: '/hooks/leads',
+            method: 'POST',
+            sample_payload: {
+              lead: {
+                id: 'lead-1001',
+                name: 'Rivera Labs',
+                email: 'buyer@riveralabs.example',
+                score: 91,
+              },
+            },
+          },
+        },
+      },
+      {
+        id: 'json_extract-1',
+        type: 'json_extract',
+        position: { x: 300, y: 220 },
+        data: { config: { path: 'payload.lead.score', use_default: true, default: 0 } },
+      },
+      {
+        id: 'filter-1',
+        type: 'filter',
+        position: { x: 500, y: 220 },
+        data: { config: { field: '', operator: '>=', value: 80 } },
+      },
+      {
+        id: 'notification-1',
+        type: 'notification',
+        position: { x: 740, y: 130 },
+        data: {
+          config: {
+            channel: 'log',
+            template: 'High-intent lead detected. Score payload: {{input}}',
+          },
+        },
+      },
+      {
+        id: 'file_sink-1',
+        type: 'file_sink',
+        position: { x: 740, y: 320 },
+        data: { config: { path: 'backend/.runs/demo/lead-qualification.json', mode: 'json' } },
+      },
+    ],
+    edges: [
+      edge('e1', 'webhook_trigger-1', 'payload', 'json_extract-1', 'input'),
+      edge('e2', 'json_extract-1', 'value', 'filter-1', 'input'),
+      edge('e3', 'filter-1', 'pass', 'notification-1', 'message'),
+      edge('e4', 'filter-1', 'fail', 'file_sink-1', 'input'),
+    ],
+  },
+  {
+    id: 'webhook-order-validation',
+    label: 'Webhook Order Validation',
+    description: 'Validate order webhook contract and persist QA report',
+    nodes: [
+      {
+        id: 'webhook_trigger-1',
+        type: 'webhook_trigger',
+        position: { x: 80, y: 220 },
+        data: {
+          config: {
+            path: '/hooks/orders',
+            method: 'POST',
+            sample_payload: {
+              order: {
+                order_id: 'ord-8902',
+                customer_email: 'ops@northwind.example',
+                total: 149.95,
+                currency: 'USD',
+              },
+            },
+          },
+        },
+      },
+      {
+        id: 'json_extract-1',
+        type: 'json_extract',
+        position: { x: 300, y: 220 },
+        data: { config: { path: 'payload.order', use_default: true, default: {} } },
+      },
+      {
+        id: 'schema_validate-1',
+        type: 'schema_validate',
+        position: { x: 520, y: 220 },
+        data: {
+          config: {
+            schema_type: 'required_keys',
+            required_keys: ['order_id', 'customer_email', 'total', 'currency'],
+          },
+        },
+      },
+      {
+        id: 'notification-1',
+        type: 'notification',
+        position: { x: 760, y: 130 },
+        data: {
+          config: {
+            channel: 'log',
+            template: 'Order schema validation result: {{input}}',
+          },
+        },
+      },
+      {
+        id: 'file_sink-1',
+        type: 'file_sink',
+        position: { x: 760, y: 320 },
+        data: { config: { path: 'backend/.runs/demo/order-validation-report.json', mode: 'json' } },
+      },
+    ],
+    edges: [
+      edge('e1', 'webhook_trigger-1', 'payload', 'json_extract-1', 'input'),
+      edge('e2', 'json_extract-1', 'value', 'schema_validate-1', 'input'),
+      edge('e3', 'schema_validate-1', 'result', 'notification-1', 'message'),
+      edge('e4', 'schema_validate-1', 'result', 'file_sink-1', 'input'),
+    ],
+  },
+  {
+    id: 'support-ticket-triage',
+    label: 'Support Ticket Triage',
+    description: 'Webhook support ticket -> priority routing -> alert + queue file',
+    nodes: [
+      {
+        id: 'webhook_trigger-1',
+        type: 'webhook_trigger',
+        position: { x: 80, y: 220 },
+        data: {
+          config: {
+            path: '/hooks/support/ticket',
+            method: 'POST',
+            sample_payload: {
+              ticket: {
+                id: 'tkt-2209',
+                customer: 'Acme Retail',
+                issue: 'Payment service unavailable',
+                severity: 5,
+                channel: 'email',
+              },
+            },
+          },
+        },
+      },
+      {
+        id: 'json_extract-1',
+        type: 'json_extract',
+        position: { x: 300, y: 220 },
+        data: { config: { path: 'payload.ticket.severity', use_default: true, default: 1 } },
+      },
+      {
+        id: 'filter-1',
+        type: 'filter',
+        position: { x: 500, y: 220 },
+        data: { config: { field: '', operator: '>=', value: 4 } },
+      },
+      {
+        id: 'notification-1',
+        type: 'notification',
+        position: { x: 740, y: 130 },
+        data: {
+          config: {
+            channel: 'log',
+            template: 'P1/P2 support ticket requires immediate attention. Severity={{input}}',
+          },
+        },
+      },
+      {
+        id: 'file_sink-1',
+        type: 'file_sink',
+        position: { x: 740, y: 320 },
+        data: { config: { path: 'backend/.runs/demo/support-triage-queue.json', mode: 'json' } },
+      },
+    ],
+    edges: [
+      edge('e1', 'webhook_trigger-1', 'payload', 'json_extract-1', 'input'),
+      edge('e2', 'json_extract-1', 'value', 'filter-1', 'input'),
+      edge('e3', 'filter-1', 'pass', 'notification-1', 'message'),
+      edge('e4', 'filter-1', 'fail', 'file_sink-1', 'input'),
+    ],
+  },
+  {
+    id: 'finance-invoice-validation',
+    label: 'Finance Invoice Validation',
+    description: 'Invoice webhook -> schema check -> finance alert + compliance report',
+    nodes: [
+      {
+        id: 'webhook_trigger-1',
+        type: 'webhook_trigger',
+        position: { x: 80, y: 220 },
+        data: {
+          config: {
+            path: '/hooks/finance/invoice',
+            method: 'POST',
+            sample_payload: {
+              invoice: {
+                invoice_id: 'inv-1049',
+                vendor: 'Northwind Services',
+                amount: 1299.5,
+                currency: 'USD',
+                due_date: '2026-03-15',
+              },
+            },
+          },
+        },
+      },
+      {
+        id: 'json_extract-1',
+        type: 'json_extract',
+        position: { x: 300, y: 220 },
+        data: { config: { path: 'payload.invoice', use_default: true, default: {} } },
+      },
+      {
+        id: 'schema_validate-1',
+        type: 'schema_validate',
+        position: { x: 520, y: 220 },
+        data: {
+          config: {
+            schema_type: 'required_keys',
+            required_keys: ['invoice_id', 'vendor', 'amount', 'currency', 'due_date'],
+          },
+        },
+      },
+      {
+        id: 'notification-1',
+        type: 'notification',
+        position: { x: 760, y: 130 },
+        data: {
+          config: {
+            channel: 'log',
+            template: 'Invoice payload validation completed: {{input}}',
+          },
+        },
+      },
+      {
+        id: 'file_sink-1',
+        type: 'file_sink',
+        position: { x: 760, y: 320 },
+        data: { config: { path: 'backend/.runs/demo/invoice-validation-report.json', mode: 'json' } },
+      },
+    ],
+    edges: [
+      edge('e1', 'webhook_trigger-1', 'payload', 'json_extract-1', 'input'),
+      edge('e2', 'json_extract-1', 'value', 'schema_validate-1', 'input'),
+      edge('e3', 'schema_validate-1', 'result', 'notification-1', 'message'),
+      edge('e4', 'schema_validate-1', 'result', 'file_sink-1', 'input'),
+    ],
+  },
 ];

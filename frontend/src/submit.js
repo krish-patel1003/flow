@@ -72,11 +72,12 @@ export const SubmitPipelineButton = () => {
 
   return (
     <button
+      data-tour="submit-pipeline"
       className="submit-button"
       onClick={handleSubmit}
       disabled={isSubmitting} // Disable button while submitting
     >
-      {isSubmitting ? "Submitting..." : "Submit Pipeline"}
+      {isSubmitting ? "Running..." : "Run"}
     </button>
   );
 };

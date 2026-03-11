@@ -1,1 +1,0 @@
-{"ok": true, "output": {"dataset": "vega-cars", "rows_processed": 392, "summary_by_origin": [{"origin": "Europe", "count": 68, "avg_mpg": 27.6, "avg_hp": 80.56}, {"origin": "Japan", "count": 79, "avg_mpg": 30.45, "avg_hp": 79.84}, {"origin": "USA", "count": 245, "avg_mpg": 20.03, "avg_hp": 119.05}]}}

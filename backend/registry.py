@@ -7,6 +7,8 @@ from typing import Dict, FrozenSet
 EXECUTABLE_NODE_TYPES: FrozenSet[str] = frozenset(
     {
         "manual_trigger",
+        "scheduler_trigger",
+        "webhook_trigger",
         "file_source",
         "python_transform",
         "file_sink",
@@ -17,6 +19,11 @@ EXECUTABLE_NODE_TYPES: FrozenSet[str] = frozenset(
         "llm",
         "imageProcessing",
         "dataAggregation",
+        "json_extract",
+        "join_merge",
+        "schema_validate",
+        "filter",
+        "notification",
     }
 )
 
@@ -47,6 +54,8 @@ class NodeSpec:
 
 NODE_PORTS: Dict[str, NodePorts] = {
     "manual_trigger": NodePorts(inputs=frozenset(), outputs=frozenset({"start"})),
+    "scheduler_trigger": NodePorts(inputs=frozenset(), outputs=frozenset({"start"})),
+    "webhook_trigger": NodePorts(inputs=frozenset(), outputs=frozenset({"payload"})),
     "file_source": NodePorts(inputs=frozenset({"trigger"}), outputs=frozenset({"data"})),
     "python_transform": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"output"})),
     "file_sink": NodePorts(inputs=frozenset({"input"}), outputs=frozenset()),
@@ -59,6 +68,11 @@ NODE_PORTS: Dict[str, NodePorts] = {
     "dataAggregation": NodePorts(
         inputs=frozenset({"data1", "data2", "data3"}), outputs=frozenset({"aggregated"})
     ),
+    "json_extract": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"value"})),
+    "join_merge": NodePorts(inputs=frozenset({"left", "right"}), outputs=frozenset({"merged"})),
+    "schema_validate": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"result"})),
+    "filter": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"pass", "fail"})),
+    "notification": NodePorts(inputs=frozenset({"message"}), outputs=frozenset({"status"})),
 }
 
 
@@ -73,6 +87,22 @@ NODE_SPECS: tuple[NodeSpec, ...] = (
         inputs=tuple(),
         outputs=(("start", "any"),),
         defaults={},
+    ),
+    NodeSpec(
+        type="scheduler_trigger",
+        label="Scheduler Trigger",
+        executable=True,
+        inputs=tuple(),
+        outputs=(("start", "json"),),
+        defaults={"cron": "0 * * * *", "timezone": "UTC", "enabled": True},
+    ),
+    NodeSpec(
+        type="webhook_trigger",
+        label="Webhook Trigger",
+        executable=True,
+        inputs=tuple(),
+        outputs=(("payload", "json"),),
+        defaults={"path": "/hooks/default", "method": "POST", "secret": "", "sample_payload": {}},
     ),
     NodeSpec(
         type="file_source",
@@ -169,5 +199,45 @@ NODE_SPECS: tuple[NodeSpec, ...] = (
         inputs=(("data1", "any"), ("data2", "any"), ("data3", "any")),
         outputs=(("aggregated", "any"),),
         defaults={"aggregationType": "sum", "values": []},
+    ),
+    NodeSpec(
+        type="json_extract",
+        label="JSON Extract",
+        executable=True,
+        inputs=(("input", "json"),),
+        outputs=(("value", "any"),),
+        defaults={"path": "", "use_default": False, "default": None},
+    ),
+    NodeSpec(
+        type="join_merge",
+        label="Join Merge",
+        executable=True,
+        inputs=(("left", "any"), ("right", "any")),
+        outputs=(("merged", "any"),),
+        defaults={"strategy": "object_merge"},
+    ),
+    NodeSpec(
+        type="schema_validate",
+        label="Schema Validate",
+        executable=True,
+        inputs=(("input", "any"),),
+        outputs=(("result", "json"),),
+        defaults={"schema_type": "required_keys", "required_keys": []},
+    ),
+    NodeSpec(
+        type="filter",
+        label="Filter",
+        executable=True,
+        inputs=(("input", "any"),),
+        outputs=(("pass", "any"), ("fail", "any")),
+        defaults={"field": "", "operator": "==", "value": ""},
+    ),
+    NodeSpec(
+        type="notification",
+        label="Notification",
+        executable=True,
+        inputs=(("message", "any"),),
+        outputs=(("status", "json"),),
+        defaults={"channel": "log", "target": "", "template": "{{input}}", "timeout_seconds": 10},
     ),
 )

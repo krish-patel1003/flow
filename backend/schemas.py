@@ -32,6 +32,27 @@ class ManualTriggerConfig(BaseModel):
     retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
 
 
+class SchedulerTriggerConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cron: str = "0 * * * *"
+    timezone: str = "UTC"
+    enabled: bool = True
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class WebhookTriggerConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str = "/hooks/default"
+    method: Literal["POST", "PUT", "PATCH"] = "POST"
+    secret: str = ""
+    sample_payload: Any = Field(default_factory=dict)
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
 class FileSourceConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -125,8 +146,59 @@ class DataAggregationConfig(BaseModel):
     retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
 
 
+class JsonExtractConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str = ""
+    use_default: bool = False
+    default: Any = None
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class JoinMergeConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    strategy: Literal["object_merge", "concat", "zip"] = "object_merge"
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class SchemaValidateConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_type: Literal["required_keys", "type_check"] = "required_keys"
+    required_keys: List[str] = Field(default_factory=list)
+    expected_type: Literal["dict", "list", "string", "number", "boolean"] = "dict"
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class FilterConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    field: str = ""
+    operator: Literal["==", "!=", ">", "<", ">=", "<=", "contains"] = "=="
+    value: Any = ""
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class NotificationConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    channel: Literal["log", "webhook"] = "log"
+    target: str = ""
+    template: str = "{{input}}"
+    timeout_seconds: int = Field(default=10, ge=1, le=60)
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
 NodeType = Literal[
     "manual_trigger",
+    "scheduler_trigger",
+    "webhook_trigger",
     "file_source",
     "python_transform",
     "file_sink",
@@ -139,11 +211,18 @@ NodeType = Literal[
     "dataAggregation",
     "conditional",
     "api",
+    "json_extract",
+    "join_merge",
+    "schema_validate",
+    "filter",
+    "notification",
 ]
 
 
 NodeConfig = Union[
     ManualTriggerConfig,
+    SchedulerTriggerConfig,
+    WebhookTriggerConfig,
     FileSourceConfig,
     PythonTransformConfig,
     FileSinkConfig,
@@ -154,6 +233,11 @@ NodeConfig = Union[
     LLMConfig,
     ImageProcessingConfig,
     DataAggregationConfig,
+    JsonExtractConfig,
+    JoinMergeConfig,
+    SchemaValidateConfig,
+    FilterConfig,
+    NotificationConfig,
     Dict[str, Any],
 ]
 
