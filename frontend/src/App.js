@@ -1,7 +1,6 @@
 import { PipelineToolbar } from './toolbar';
 import { PipelineUI } from './ui';
-import { RunMonitor } from './runMonitor';
-import { InspectorPanel } from './inspectorPanel';
+import { RightPane } from './rightPane';
 import './appLayout.css';
 
 
@@ -12,10 +11,7 @@ function App() {
       <div className="canvas-pane">
         <PipelineUI />
       </div>
-      <div className="right-pane">
-        <InspectorPanel />
-        <RunMonitor />
-      </div>
+      <RightPane />
     </div>
   );
 }

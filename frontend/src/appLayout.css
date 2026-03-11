@@ -14,10 +14,42 @@
 
 .right-pane {
   min-width: 0;
-  display: grid;
-  grid-template-rows: 1fr 42%;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
   border-left: 1px solid #d4dde8;
   background: #fbfdff;
+  overflow: hidden;
+}
+
+.right-pane-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #d4dde8;
+  background: #f2f7fc;
+}
+
+.right-pane-tabs button {
+  border: 1px solid #b7cadb;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #2a4d67;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.right-pane-tabs button.active {
+  background: #0d5a8f;
+  border-color: #0d5a8f;
+  color: #ffffff;
+}
+
+.right-pane-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 1100px) {

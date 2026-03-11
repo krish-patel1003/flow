@@ -16,6 +16,7 @@ export const useStore = create((set, get) => ({
   librarySearch: '',
   activeLibraryCategory: 'all',
   inspectorTab: 'config',
+  rightPaneTab: 'inspector',
   activeBottomTab: 'runs',
   bottomPanelOpen: true,
   tourSeen: false,
@@ -102,6 +103,9 @@ export const useStore = create((set, get) => ({
   },
   setInspectorTab: (value) => {
     set({ inspectorTab: value });
+  },
+  setRightPaneTab: (value) => {
+    set({ rightPaneTab: value });
   },
   setActiveBottomTab: (value) => {
     set({ activeBottomTab: value });
