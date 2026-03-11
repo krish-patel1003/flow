@@ -1,0 +1,45 @@
+{
+  "run_id": "run_8c7589edf2",
+  "status": "succeeded",
+  "created_at": "2026-03-11T06:15:47.433870+00:00",
+  "started_at": "2026-03-11T06:15:47.436868+00:00",
+  "finished_at": "2026-03-11T06:15:47.449681+00:00",
+  "pipeline_id": "pipeline-demo",
+  "node_states": {
+    "webhook_trigger-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T06:15:47.438396+00:00",
+      "finished_at": "2026-03-11T06:15:47.440378+00:00",
+      "error": null
+    },
+    "json_extract-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T06:15:47.441565+00:00",
+      "finished_at": "2026-03-11T06:15:47.442425+00:00",
+      "error": null
+    },
+    "schema_validate-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T06:15:47.443360+00:00",
+      "finished_at": "2026-03-11T06:15:47.444217+00:00",
+      "error": null
+    },
+    "notification-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T06:15:47.445032+00:00",
+      "finished_at": "2026-03-11T06:15:47.446184+00:00",
+      "error": null
+    },
+    "file_sink-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T06:15:47.445437+00:00",
+      "finished_at": "2026-03-11T06:15:47.447978+00:00",
+      "error": null
+    }
+  }
+}

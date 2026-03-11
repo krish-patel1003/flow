@@ -77,7 +77,7 @@ export const SubmitPipelineButton = () => {
       onClick={handleSubmit}
       disabled={isSubmitting} // Disable button while submitting
     >
-      {isSubmitting ? "Submitting..." : "Submit Pipeline"}
+      {isSubmitting ? "Running..." : "Run"}
     </button>
   );
 };

@@ -1,0 +1,11 @@
+{
+  "args": {},
+  "headers": {
+    "Accept-Encoding": "identity",
+    "Host": "httpbin.org",
+    "User-Agent": "Python-urllib/3.11",
+    "X-Amzn-Trace-Id": "Root=1-69b10671-0e02bbe8203adcd8427ea25c"
+  },
+  "origin": "47.147.155.76",
+  "url": "https://httpbin.org/get"
+}

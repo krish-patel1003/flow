@@ -1,1 +1,0 @@
-{"ok": true, "output": {"dataset": "iris", "total_rows": 150, "species_counts": {"setosa": 50, "versicolor": 50, "virginica": 50}}}

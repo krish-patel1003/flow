@@ -16,7 +16,7 @@ export const RightPane = () => {
           className={rightPaneTab === 'inspector' ? 'active' : ''}
           onClick={() => setRightPaneTab('inspector')}
         >
-          Inspector
+          Inspect
         </button>
         <button
           type="button"

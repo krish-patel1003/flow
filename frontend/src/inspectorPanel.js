@@ -67,7 +67,7 @@ export const InspectorPanel = () => {
   if (!selectedNode) {
     return (
       <aside className="inspector-panel">
-        <h2>Inspector</h2>
+        <h2>Inspect</h2>
         <p>Select a node to view settings.</p>
         <div className="inspector-help-card">
           <strong>Beginner tip</strong>
@@ -599,7 +599,7 @@ export const InspectorPanel = () => {
 
   return (
     <aside className="inspector-panel">
-      <h2>Inspector</h2>
+      <h2>Inspect</h2>
       <div className="inspector-tabs">
         <button
           type="button"

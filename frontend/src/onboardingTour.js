@@ -23,8 +23,8 @@ const steps = [
   },
   {
     target: '.right-pane-tabs',
-    title: 'Inspector and Console',
-    content: 'Use tabs here like browser devtools: configure in Inspector, monitor in Console.',
+    title: 'Inspect and Console',
+    content: 'Use tabs here like browser devtools: configure in Inspect, monitor in Console.',
   },
   {
     target: '.inspector-panel',
