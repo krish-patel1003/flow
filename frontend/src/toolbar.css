@@ -31,6 +31,15 @@
   width: 100%;
 }
 
+.tour-replay-button {
+  border: 1px solid #b9c9d8;
+  border-radius: 8px;
+  background: #f2f7fc;
+  color: #1f4463;
+  padding: 8px;
+  cursor: pointer;
+}
+
 .category-row {
   display: flex;
   gap: 6px;

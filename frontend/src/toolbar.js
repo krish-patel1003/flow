@@ -22,11 +22,13 @@ export const PipelineToolbar = () => {
     activeLibraryCategory,
     setLibrarySearch,
     setActiveLibraryCategory,
+    setTourRunning,
   } = useStore((state) => ({
     librarySearch: state.librarySearch,
     activeLibraryCategory: state.activeLibraryCategory,
     setLibrarySearch: state.setLibrarySearch,
     setActiveLibraryCategory: state.setActiveLibraryCategory,
+    setTourRunning: state.setTourRunning,
   }));
 
   const iconMap = {
@@ -102,9 +104,13 @@ export const PipelineToolbar = () => {
         <DemoLoader />
         <SubmitPipelineButton />
         <ResetCanvasButton />
+        <button type="button" className="tour-replay-button" onClick={() => setTourRunning(true)}>
+          Replay Tour
+        </button>
       </div>
 
       <input
+        className="library-search"
         type="search"
         value={librarySearch}
         onChange={(event) => setLibrarySearch(event.target.value)}
