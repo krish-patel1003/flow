@@ -5,6 +5,8 @@ import './inspectorPanel.css';
 
 const nodePorts = {
   manual_trigger: { inputs: [], outputs: ['start'] },
+  scheduler_trigger: { inputs: [], outputs: ['start'] },
+  webhook_trigger: { inputs: [], outputs: ['payload'] },
   file_source: { inputs: ['trigger'], outputs: ['data'] },
   python_transform: { inputs: ['input'], outputs: ['output'] },
   file_sink: { inputs: ['input'], outputs: [] },
@@ -24,6 +26,8 @@ const nodePorts = {
 
 const beginnerTips = {
   file_source: 'Use this to load local text or JSON before transformations.',
+  scheduler_trigger: 'Use cron defaults first, then tune timezone if needed.',
+  webhook_trigger: 'Start with a sample payload to test downstream flow quickly.',
   python_transform: 'Use this only when built-in nodes are not enough.',
   file_sink: 'Use this to save final outputs so results are easy to inspect.',
   api: 'Start with GET requests, then switch to POST when sending payloads.',
@@ -109,6 +113,74 @@ export const InspectorPanel = () => {
           <p>Manual Trigger has no required fields.</p>
           {renderAdvancedRetry()}
         </div>
+      );
+    }
+    if (selectedNode.type === 'scheduler_trigger') {
+      return (
+        <>
+          <label>Cron</label>
+          <input
+            type="text"
+            value={config.cron || '0 * * * *'}
+            onChange={(event) => setConfig({ cron: event.target.value })}
+          />
+          <label>Timezone</label>
+          <input
+            type="text"
+            value={config.timezone || 'UTC'}
+            onChange={(event) => setConfig({ timezone: event.target.value })}
+          />
+          <label className="inline-check">
+            <input
+              type="checkbox"
+              checked={config.enabled !== false}
+              onChange={(event) => setConfig({ enabled: event.target.checked })}
+            />
+            Enabled
+          </label>
+          {renderAdvancedRetry()}
+        </>
+      );
+    }
+    if (selectedNode.type === 'webhook_trigger') {
+      return (
+        <>
+          <label>Path</label>
+          <input
+            type="text"
+            value={config.path || '/hooks/default'}
+            onChange={(event) => setConfig({ path: event.target.value })}
+          />
+          <label>Method</label>
+          <select
+            value={config.method || 'POST'}
+            onChange={(event) => setConfig({ method: event.target.value })}
+          >
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+          </select>
+          <label>Secret (optional)</label>
+          <input
+            type="text"
+            value={config.secret || ''}
+            onChange={(event) => setConfig({ secret: event.target.value })}
+          />
+          <label>Sample Payload (JSON)</label>
+          <textarea
+            value={JSON.stringify(config.sample_payload ?? {}, null, 2)}
+            onChange={(event) => {
+              try {
+                const parsed = JSON.parse(event.target.value || '{}');
+                setConfig({ sample_payload: parsed });
+              } catch (_error) {
+                return;
+              }
+            }}
+            style={{ minHeight: '120px' }}
+          />
+          {renderAdvancedRetry()}
+        </>
       );
     }
     if (selectedNode.type === 'file_source') {

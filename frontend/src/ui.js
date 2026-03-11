@@ -21,6 +21,8 @@ import { APIRequestNode } from './nodes/APIRequestNode';
 import { LLMNode } from './nodes/LLMNode';
 import { ImageProcessingNode } from './nodes/ImageProcessingNode';
 import { DataAggregationNode } from './nodes/DataAggregationNode';
+import { SchedulerTriggerNode } from './nodes/SchedulerTriggerNode';
+import { WebhookTriggerNode } from './nodes/WebhookTriggerNode';
 import { JsonExtractNode } from './nodes/JsonExtractNode';
 import { JoinMergeNode } from './nodes/JoinMergeNode';
 import { SchemaValidateNode } from './nodes/SchemaValidateNode';
@@ -35,6 +37,8 @@ const proOptions = { hideAttribution: true };
 //Types of Node
 const nodeTypes = {
   manual_trigger: ManualTriggerNode,
+  scheduler_trigger: SchedulerTriggerNode,
+  webhook_trigger: WebhookTriggerNode,
   file_source: FileSourceNode,
   python_transform: PythonTransformNode,
   file_sink: FileSinkNode,

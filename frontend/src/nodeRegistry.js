@@ -7,6 +7,31 @@ export const v1NodeRegistry = {
     tags: ['start', 'manual'],
     defaults: {},
   },
+  scheduler_trigger: {
+    label: 'Scheduler Trigger',
+    executable: true,
+    category: 'triggers',
+    description: 'Start a run based on a cron-like schedule configuration.',
+    tags: ['cron', 'time', 'automation'],
+    defaults: {
+      cron: '0 * * * *',
+      timezone: 'UTC',
+      enabled: true,
+    },
+  },
+  webhook_trigger: {
+    label: 'Webhook Trigger',
+    executable: true,
+    category: 'triggers',
+    description: 'Start from an incoming webhook payload contract.',
+    tags: ['event', 'http', 'hook'],
+    defaults: {
+      path: '/hooks/default',
+      method: 'POST',
+      secret: '',
+      sample_payload: {},
+    },
+  },
   file_source: {
     label: 'File Source',
     executable: true,

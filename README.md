@@ -5,6 +5,8 @@ Local, single-user pipeline runner with a visual editor and FastAPI backend.
 Currently executable nodes:
 
 - `manual_trigger`
+- `scheduler_trigger`
+- `webhook_trigger`
 - `file_source`
 - `python_transform` (inline Python script)
 - `file_sink`

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib import error as urlerror
 from urllib import parse as urlparse
@@ -14,6 +15,34 @@ from .safe_exec import run_transform_script
 
 def execute_manual_trigger(node_config: dict, incoming_data):
     return incoming_data
+
+
+def execute_scheduler_trigger(node_config: dict, incoming_data):
+    if not node_config.get("enabled", True):
+        return {
+            "triggered": False,
+            "reason": "disabled",
+            "cron": node_config.get("cron", ""),
+            "timezone": node_config.get("timezone", "UTC"),
+        }
+    return {
+        "triggered": True,
+        "cron": node_config.get("cron", ""),
+        "timezone": node_config.get("timezone", "UTC"),
+        "triggered_at": datetime.now(UTC).isoformat(),
+    }
+
+
+def execute_webhook_trigger(node_config: dict, incoming_data):
+    sample_payload = node_config.get("sample_payload", {})
+    if incoming_data is not None:
+        return incoming_data
+    return {
+        "source": "webhook_trigger",
+        "path": node_config.get("path", "/hooks/default"),
+        "method": node_config.get("method", "POST"),
+        "payload": sample_payload,
+    }
 
 
 def execute_file_source(node_config: dict, incoming_data):
@@ -373,18 +402,24 @@ def execute_filter(node_config: dict, incoming_data):
             left = None
 
     matched = False
+
+    def as_float(value):
+        if value is None:
+            raise ValueError("Filter comparison requires numeric values")
+        return float(value)
+
     if operator == "==":
         matched = left == expected
     elif operator == "!=":
         matched = left != expected
     elif operator == ">":
-        matched = float(left) > float(expected)
+        matched = as_float(left) > as_float(expected)
     elif operator == "<":
-        matched = float(left) < float(expected)
+        matched = as_float(left) < as_float(expected)
     elif operator == ">=":
-        matched = float(left) >= float(expected)
+        matched = as_float(left) >= as_float(expected)
     elif operator == "<=":
-        matched = float(left) <= float(expected)
+        matched = as_float(left) <= as_float(expected)
     elif operator == "contains":
         matched = str(expected) in str(left)
     else:

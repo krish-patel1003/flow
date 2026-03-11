@@ -3,7 +3,7 @@
 - Local execution only
 - One machine
 - One run at a time (single-user)
-- `manual_trigger`, `file_source`, `python_transform`, `file_sink`, `text`, `math`, `conditional`, `api`, `llm`, `imageProcessing`, `dataAggregation`, `json_extract`, `join_merge`, `schema_validate`, `filter`, `notification`
+- `manual_trigger`, `scheduler_trigger`, `webhook_trigger`, `file_source`, `python_transform`, `file_sink`, `text`, `math`, `conditional`, `api`, `llm`, `imageProcessing`, `dataAggregation`, `json_extract`, `join_merge`, `schema_validate`, `filter`, `notification`
 - Inline Python transform scripts (`transform(input_data)`)
 - Process-based execution with optional Dockerized local setup
 - Validation for schema, ports, DAG, and node config
@@ -15,6 +15,8 @@
 ### Node ports
 
 - `manual_trigger`: outputs `start`
+- `scheduler_trigger`: outputs `start`
+- `webhook_trigger`: outputs `payload`
 - `file_source`: inputs `trigger`, outputs `data`
 - `python_transform`: inputs `input`, outputs `output`
 - `file_sink`: inputs `input`

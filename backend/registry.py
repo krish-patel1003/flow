@@ -7,6 +7,8 @@ from typing import Dict, FrozenSet
 EXECUTABLE_NODE_TYPES: FrozenSet[str] = frozenset(
     {
         "manual_trigger",
+        "scheduler_trigger",
+        "webhook_trigger",
         "file_source",
         "python_transform",
         "file_sink",
@@ -52,6 +54,8 @@ class NodeSpec:
 
 NODE_PORTS: Dict[str, NodePorts] = {
     "manual_trigger": NodePorts(inputs=frozenset(), outputs=frozenset({"start"})),
+    "scheduler_trigger": NodePorts(inputs=frozenset(), outputs=frozenset({"start"})),
+    "webhook_trigger": NodePorts(inputs=frozenset(), outputs=frozenset({"payload"})),
     "file_source": NodePorts(inputs=frozenset({"trigger"}), outputs=frozenset({"data"})),
     "python_transform": NodePorts(inputs=frozenset({"input"}), outputs=frozenset({"output"})),
     "file_sink": NodePorts(inputs=frozenset({"input"}), outputs=frozenset()),
@@ -83,6 +87,22 @@ NODE_SPECS: tuple[NodeSpec, ...] = (
         inputs=tuple(),
         outputs=(("start", "any"),),
         defaults={},
+    ),
+    NodeSpec(
+        type="scheduler_trigger",
+        label="Scheduler Trigger",
+        executable=True,
+        inputs=tuple(),
+        outputs=(("start", "json"),),
+        defaults={"cron": "0 * * * *", "timezone": "UTC", "enabled": True},
+    ),
+    NodeSpec(
+        type="webhook_trigger",
+        label="Webhook Trigger",
+        executable=True,
+        inputs=tuple(),
+        outputs=(("payload", "json"),),
+        defaults={"path": "/hooks/default", "method": "POST", "secret": "", "sample_payload": {}},
     ),
     NodeSpec(
         type="file_source",

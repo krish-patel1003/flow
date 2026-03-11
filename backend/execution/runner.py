@@ -27,8 +27,10 @@ from .executors import (
     execute_math,
     execute_notification,
     execute_python_transform,
+    execute_scheduler_trigger,
     execute_schema_validate,
     execute_text,
+    execute_webhook_trigger,
 )
 from .storage import ensure_run_paths, write_json
 
@@ -144,6 +146,10 @@ class RunManager:
     def _execute_node_once(self, node_type: str, node_config: dict, incoming: object, context: RuntimeContext):
         if node_type == "manual_trigger":
             return execute_manual_trigger(node_config, incoming), "", []
+        if node_type == "scheduler_trigger":
+            return execute_scheduler_trigger(node_config, incoming), "", []
+        if node_type == "webhook_trigger":
+            return execute_webhook_trigger(node_config, incoming), "", []
         if node_type == "file_source":
             output = execute_file_source(node_config, incoming)
             return output, "", [("file_source", node_config["path"])]

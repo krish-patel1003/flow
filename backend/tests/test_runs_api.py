@@ -625,3 +625,61 @@ def test_run_pipeline_notification_log_channel(tmp_path: Path, monkeypatch) -> N
     payload = json.loads(output_file.read_text())
     assert payload["status"] == "sent"
     assert payload["channel"] == "log"
+
+
+def test_run_pipeline_scheduler_and_webhook_triggers(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    output_file = tmp_path / "trigger_payload.json"
+    pipeline = {
+        "id": "pipe-triggers",
+        "name": "Triggers pipeline",
+        "version": "v1",
+        "nodes": [
+            {
+                "id": "n1",
+                "type": "scheduler_trigger",
+                "position": {"x": 0, "y": 0},
+                "config": {"cron": "0 * * * *", "timezone": "UTC", "enabled": True},
+            },
+            {
+                "id": "n2",
+                "type": "webhook_trigger",
+                "position": {"x": 0, "y": 40},
+                "config": {
+                    "path": "/hooks/demo",
+                    "method": "POST",
+                    "sample_payload": {"customer": "Ada", "priority": "high"},
+                },
+            },
+            {
+                "id": "n3",
+                "type": "join_merge",
+                "position": {"x": 20, "y": 20},
+                "config": {"strategy": "object_merge"},
+            },
+            {
+                "id": "n4",
+                "type": "file_sink",
+                "position": {"x": 40, "y": 20},
+                "config": {"path": str(output_file), "mode": "json"},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n3", "port": "left"}},
+            {"id": "e2", "source": {"node_id": "n2", "port": "payload"}, "target": {"node_id": "n3", "port": "right"}},
+            {"id": "e3", "source": {"node_id": "n3", "port": "merged"}, "target": {"node_id": "n4", "port": "input"}},
+        ],
+    }
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+
+    payload = json.loads(output_file.read_text())
+    assert payload["source"] == "webhook_trigger"
+    assert payload["payload"]["customer"] == "Ada"
+    assert payload["triggered"] is True

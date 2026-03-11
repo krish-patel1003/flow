@@ -31,6 +31,8 @@ export const PipelineToolbar = () => {
 
   const iconMap = {
     manual_trigger: Input,
+    scheduler_trigger: Input,
+    webhook_trigger: API,
     file_source: Text,
     python_transform: API,
     file_sink: Output,

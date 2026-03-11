@@ -32,6 +32,27 @@ class ManualTriggerConfig(BaseModel):
     retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
 
 
+class SchedulerTriggerConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cron: str = "0 * * * *"
+    timezone: str = "UTC"
+    enabled: bool = True
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
+class WebhookTriggerConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str = "/hooks/default"
+    method: Literal["POST", "PUT", "PATCH"] = "POST"
+    secret: str = ""
+    sample_payload: Any = Field(default_factory=dict)
+    retries: int = Field(default=0, ge=0, le=3)
+    retry_backoff_seconds: float = Field(default=0, ge=0, le=10)
+
+
 class FileSourceConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -176,6 +197,8 @@ class NotificationConfig(BaseModel):
 
 NodeType = Literal[
     "manual_trigger",
+    "scheduler_trigger",
+    "webhook_trigger",
     "file_source",
     "python_transform",
     "file_sink",
@@ -198,6 +221,8 @@ NodeType = Literal[
 
 NodeConfig = Union[
     ManualTriggerConfig,
+    SchedulerTriggerConfig,
+    WebhookTriggerConfig,
     FileSourceConfig,
     PythonTransformConfig,
     FileSinkConfig,
