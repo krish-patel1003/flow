@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { BaseNode } from './BaseNode';
-
+import { useStore } from '../store';
 
 export const ConditionalNode = ({ id, data }) => {
-  const [condition, setCondition] = useState(data.condition || '==');
+  const updateNodeConfig = useStore((state) => state.updateNodeConfig);
+  const config = data?.config || { operator: '==' };
 
   return (
     <BaseNode
@@ -13,11 +13,17 @@ export const ConditionalNode = ({ id, data }) => {
       outputHandles={[{ id: 'true' }, { id: 'false' }]}
       heading="Conditional"
     >
-      <select value={condition} onChange={(e) => setCondition(e.target.value)}>
-        <option value="==">==(Equal)</option>
-        <option value="!==">!==(Not Equal)</option>
-        <option value=">">&gt;(Greater Than)</option>
-        <option value="<">&lt;(Less Than)</option>
+      <label>Operator</label>
+      <select
+        value={config.operator || '=='}
+        onChange={(event) => updateNodeConfig(id, { operator: event.target.value })}
+      >
+        <option value="==">==</option>
+        <option value="!=">!=</option>
+        <option value=">">&gt;</option>
+        <option value="<">&lt;</option>
+        <option value=">=">&gt;=</option>
+        <option value="<=">&lt;=</option>
       </select>
     </BaseNode>
   );

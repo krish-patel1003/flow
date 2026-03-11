@@ -12,6 +12,7 @@ import Conditional from "./assets/Conditional.svg";
 import API from "./assets/Integration.svg";
 import Text from "./assets/Text_format.svg";
 import { comingSoonNodes } from './nodeRegistry';
+import { DemoLoader } from './demoLoader';
 
 export const PipelineToolbar = () => {
   const comingSoonIconMap = {
@@ -32,6 +33,13 @@ export const PipelineToolbar = () => {
       <DraggableNode type="file_source" label="File Source" img={Text} />
       <DraggableNode type="python_transform" label="Python Transform" img={API} />
       <DraggableNode type="file_sink" label="File Sink" img={Output} />
+      <DraggableNode type="text" label="Text" img={Text} />
+      <DraggableNode type="math" label="Math" img={Math} />
+      <DraggableNode type="conditional" label="Conditional" img={Conditional} />
+      <DraggableNode type="api" label="API Request" img={API} />
+      <DraggableNode type="llm" label="LLM" img={LLM} />
+      <DraggableNode type="imageProcessing" label="Image Processing" img={ImageProcessing} />
+      <DraggableNode type="dataAggregation" label="Data Aggregation" img={DataAggregation} />
       {comingSoonNodes.map((node) => (
         <DraggableNode
           key={node.type}
@@ -41,6 +49,7 @@ export const PipelineToolbar = () => {
           disabled
         />
       ))}
+      <DemoLoader />
       <SubmitPipelineButton />
     </div>
   );

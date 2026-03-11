@@ -14,6 +14,13 @@ import { ManualTriggerNode } from './nodes/ManualTriggerNode';
 import { FileSourceNode } from './nodes/FileSourceNode';
 import { PythonTransformNode } from './nodes/PythonTransformNode';
 import { FileSinkNode } from './nodes/FileSinkNode';
+import { TextNode } from './nodes/TextNode';
+import { MathNode } from './nodes/MathNode';
+import { ConditionalNode } from './nodes/ConditionalNode';
+import { APIRequestNode } from './nodes/APIRequestNode';
+import { LLMNode } from './nodes/LLMNode';
+import { ImageProcessingNode } from './nodes/ImageProcessingNode';
+import { DataAggregationNode } from './nodes/DataAggregationNode';
 import { v1NodeRegistry } from './nodeRegistry';
 
 import ButtonEdge from './components/ButtonEdge';
@@ -26,6 +33,13 @@ const nodeTypes = {
   file_source: FileSourceNode,
   python_transform: PythonTransformNode,
   file_sink: FileSinkNode,
+  text: TextNode,
+  math: MathNode,
+  conditional: ConditionalNode,
+  api: APIRequestNode,
+  llm: LLMNode,
+  imageProcessing: ImageProcessingNode,
+  dataAggregation: DataAggregationNode,
 };
 
 //getting state of the application

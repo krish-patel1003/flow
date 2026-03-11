@@ -1,0 +1,5 @@
+{
+  "input_path": "backend/.runs/demo/incremental-events.csv",
+  "state_path": "backend/.runs/demo/incremental-state.json",
+  "output_path": "backend/.runs/demo/incremental-latest.json"
+}

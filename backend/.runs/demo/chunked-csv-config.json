@@ -1,0 +1,5 @@
+{
+  "input_path": "backend/.runs/demo/large-events.csv",
+  "output_path": "backend/.runs/demo/large-events-curated.csv",
+  "partition_dir": "backend/.runs/demo/partitions"
+}

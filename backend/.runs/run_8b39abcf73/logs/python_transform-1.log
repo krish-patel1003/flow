@@ -1,0 +1,44 @@
+Attempt 1/1 failed: Traceback (most recent call last):
+  File "/app/backend/.runs/run_8b39abcf73/_transform_3211db6a749f4737b8f3f27960c4be59/runner.py", line 13, in <module>
+    output = fn(payload['input'])
+             ^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 31, in transform
+  File "/usr/local/lib/python3.11/pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/.runs/demo/large-events.csv'
+Traceback (most recent call last):
+  File "/app/backend/execution/runner.py", line 250, in _execute_pipeline
+    output, extra_logs, artifacts = future.result()
+                                    ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/execution/runner.py", line 199, in _execute_node_with_retry
+    raise last_exc
+  File "/app/backend/execution/runner.py", line 180, in _execute_node_with_retry
+    return self._execute_node_once(node.type, node.config, incoming, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/execution/runner.py", line 146, in _execute_node_once
+    output, logs = execute_python_transform(node_config, incoming, context.paths["run_root"])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/execution/executors.py", line 38, in execute_python_transform
+    return run_transform_script(script, incoming_data, timeout_seconds, working_dir)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/execution/safe_exec.py", line 54, in run_transform_script
+    raise RuntimeError(result.get("traceback") or result.get("error") or "Transform failed")
+RuntimeError: Traceback (most recent call last):
+  File "/app/backend/.runs/run_8b39abcf73/_transform_3211db6a749f4737b8f3f27960c4be59/runner.py", line 13, in <module>
+    output = fn(payload['input'])
+             ^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 31, in transform
+  File "/usr/local/lib/python3.11/pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'backend/.runs/demo/large-events.csv'
+

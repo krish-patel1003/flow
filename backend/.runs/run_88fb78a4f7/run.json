@@ -1,0 +1,38 @@
+{
+  "run_id": "run_88fb78a4f7",
+  "status": "failed",
+  "created_at": "2026-03-10T08:24:58.870981+00:00",
+  "started_at": "2026-03-10T08:24:58.873007+00:00",
+  "finished_at": "2026-03-10T08:24:59.068213+00:00",
+  "pipeline_id": "pipeline-demo",
+  "node_states": {
+    "manual_trigger-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-10T08:24:58.875238+00:00",
+      "finished_at": "2026-03-10T08:24:58.878388+00:00",
+      "error": null
+    },
+    "file_source-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-10T08:24:58.880462+00:00",
+      "finished_at": "2026-03-10T08:24:58.917252+00:00",
+      "error": null
+    },
+    "python_transform-1": {
+      "status": "failed",
+      "attempts": 1,
+      "started_at": "2026-03-10T08:24:58.919984+00:00",
+      "finished_at": "2026-03-10T08:24:59.065728+00:00",
+      "error": "Traceback (most recent call last):\n  File \"/app/backend/.runs/run_88fb78a4f7/_transform_528a69c657404a99aec08557888b733a/runner.py\", line 13, in <module>\n    output = fn(payload['input'])\n             ^^^^^^^^^^^^^^^^^^^^\n  File \"<string>\", line 41, in transform\n  File \"/usr/local/lib/python3.11/pathlib.py\", line 1044, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: 'backend/.runs/demo/incremental-events.csv'\n"
+    },
+    "file_sink-1": {
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "finished_at": null,
+      "error": null
+    }
+  }
+}

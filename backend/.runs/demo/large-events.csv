@@ -1,0 +1,7 @@
+id,event_ts,category,amount
+e1,2026-03-01T09:00:00Z,books,19.5
+e2,2026-03-01T09:10:00Z,grocery,42.1
+e2,2026-03-01T09:10:00Z,grocery,42.1
+e3,2026-03-02T08:00:00Z,electronics,349.0
+e4,invalid-ts,books,9.0
+e5,2026-03-02T13:20:00Z,books,12.4

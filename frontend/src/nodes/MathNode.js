@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { BaseNode } from './BaseNode';
+import { useStore } from '../store';
 
-// 1. Math Operation Node
 export const MathNode = ({ id, data }) => {
-  const [operation, setOperation] = useState(data.operation || 'add');
+  const updateNodeConfig = useStore((state) => state.updateNodeConfig);
+  const config = data?.config || { operation: 'add' };
 
   return (
     <BaseNode
@@ -11,9 +11,13 @@ export const MathNode = ({ id, data }) => {
       data={data}
       inputHandles={[{ id: 'num1' }, { id: 'num2' }]}
       outputHandles={[{ id: 'result' }]}
-      heading="Math Operation"
+      heading="Math"
     >
-      <select value={operation} onChange={(e) => setOperation(e.target.value)}>
+      <label>Operation</label>
+      <select
+        value={config.operation || 'add'}
+        onChange={(event) => updateNodeConfig(id, { operation: event.target.value })}
+      >
         <option value="add">Add</option>
         <option value="subtract">Subtract</option>
         <option value="multiply">Multiply</option>

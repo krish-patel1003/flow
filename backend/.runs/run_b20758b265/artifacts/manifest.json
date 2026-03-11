@@ -1,0 +1,10 @@
+{
+  "run_id": "run_b20758b265",
+  "artifacts": [
+    {
+      "node_id": "file_sink-1",
+      "type": "file_sink",
+      "value": "/tmp/mini-sagemaker/llm-summary.txt"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ services:
     container_name: mini-sagemaker-backend
     environment:
       RUNS_DIR: /app/backend/.runs
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
     ports:
       - "8000:8000"
     volumes:

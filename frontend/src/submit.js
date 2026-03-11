@@ -4,9 +4,11 @@ import "./submitButton.css";
 import { serializePipeline } from './pipelineSerializer';
 
 export const SubmitPipelineButton = () => {
-  const { nodes, edges } = useStore((state) => ({
+  const { nodes, edges, setCurrentRun, setRunError } = useStore((state) => ({
     nodes: state.nodes,
     edges: state.edges,
+    setCurrentRun: state.setCurrentRun,
+    setRunError: state.setRunError,
   }));
 
   const [isSubmitting, setIsSubmitting] = useState(false); // Track submission status
@@ -57,11 +59,11 @@ export const SubmitPipelineButton = () => {
       }
 
       const runData = await runResponse.json();
-      const statusResponse = await fetch(`${baseUrl}/runs/${runData.run_id}`);
-      const status = await statusResponse.json();
-      alert(`Run ${runData.run_id}: ${status.status}`);
+      setCurrentRun(runData.run_id);
+      alert(`Run started: ${runData.run_id}. Open Run Monitor for live status.`);
     } catch (error) {
       console.error("Error:", error);
+      setRunError(error.message || "An error occurred while submitting the pipeline.");
       alert("An error occurred while submitting the pipeline.");
     } finally {
       setIsSubmitting(false); // Re-enable button after submission

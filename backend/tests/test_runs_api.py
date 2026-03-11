@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -9,6 +10,18 @@ from backend.main import app
 
 
 client = TestClient(app)
+
+
+def wait_for_run(run_id: str, timeout_seconds: float = 5.0) -> dict:
+    deadline = time.time() + timeout_seconds
+    while time.time() < deadline:
+        status = client.get(f"/runs/{run_id}")
+        assert status.status_code == 200
+        payload = status.json()
+        if payload["status"] in {"succeeded", "failed", "cancelled"}:
+            return payload
+        time.sleep(0.05)
+    raise AssertionError(f"Run {run_id} did not finish in time")
 
 
 def make_pipeline(input_path: str, output_path: str, script: str) -> dict:
@@ -28,13 +41,13 @@ def make_pipeline(input_path: str, output_path: str, script: str) -> dict:
                 "id": "n3",
                 "type": "python_transform",
                 "position": {"x": 20, "y": 0},
-                "config": {"script": script},
+                "config": {"script": script, "retries": 0, "retry_backoff_seconds": 0},
             },
             {
                 "id": "n4",
                 "type": "file_sink",
                 "position": {"x": 30, "y": 0},
-                "config": {"path": output_path, "mode": "text"},
+                "config": {"path": output_path, "mode": "text", "retries": 0, "retry_backoff_seconds": 0},
             },
         ],
         "edges": [
@@ -76,10 +89,9 @@ def test_run_pipeline_success(tmp_path: Path, monkeypatch) -> None:
     assert create.status_code == 200
     run_id = create.json()["run_id"]
 
-    status = client.get(f"/runs/{run_id}")
-    assert status.status_code == 200
-    data = status.json()
+    data = wait_for_run(run_id)
     assert data["status"] == "succeeded"
+    assert data["node_states"]["n3"]["attempts"] == 1
 
     assert output_file.read_text() == "HELLO"
 
@@ -114,10 +126,9 @@ def test_run_pipeline_transform_failure(tmp_path: Path, monkeypatch) -> None:
     assert create.status_code == 200
     run_id = create.json()["run_id"]
 
-    status = client.get(f"/runs/{run_id}")
-    assert status.status_code == 200
-    data = status.json()
+    data = wait_for_run(run_id)
     assert data["status"] == "failed"
+    assert data["node_states"]["n3"]["attempts"] == 1
 
     logs = client.get(f"/runs/{run_id}/logs/n3")
     assert logs.status_code == 200
@@ -145,8 +156,270 @@ def test_run_pipeline_transform_allows_imports(tmp_path: Path, monkeypatch) -> N
     assert create.status_code == 200
     run_id = create.json()["run_id"]
 
-    status = client.get(f"/runs/{run_id}")
-    assert status.status_code == 200
-    data = status.json()
+    data = wait_for_run(run_id)
     assert data["status"] == "succeeded"
+    assert data["node_states"]["n3"]["attempts"] == 1
     assert output_file.read_text() == "3.0"
+
+
+def test_list_runs_endpoint(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("hello")
+    output_file = tmp_path / "output.txt"
+    payload = {
+        "pipeline": make_pipeline(
+            str(input_file),
+            str(output_file),
+            "def transform(input_data):\n    return str(input_data).upper()",
+        )
+    }
+
+    create = client.post("/runs", json=payload)
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    wait_for_run(run_id)
+
+    listing = client.get("/runs")
+    assert listing.status_code == 200
+    runs = listing.json()["runs"]
+    assert any(run["run_id"] == run_id for run in runs)
+
+
+def test_run_pipeline_retries_transform_then_succeeds(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    marker = tmp_path / "marker.txt"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("hello")
+    output_file = tmp_path / "output.txt"
+
+    pipeline = make_pipeline(
+        str(input_file),
+        str(output_file),
+        (
+            f"from pathlib import Path\n"
+            f"marker = Path(r'{marker}')\n"
+            "def transform(input_data):\n"
+            "    if not marker.exists():\n"
+            "        marker.write_text('seen')\n"
+            "        raise ValueError('first failure')\n"
+            "    return str(input_data).upper()\n"
+        ),
+    )
+    pipeline["nodes"][2]["config"]["retries"] = 1
+    pipeline["nodes"][2]["config"]["retry_backoff_seconds"] = 0
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+    assert data["node_states"]["n3"]["attempts"] == 2
+    assert output_file.read_text() == "HELLO"
+
+
+def test_run_pipeline_cancel_request(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("hello")
+    output_file = tmp_path / "output.txt"
+
+    pipeline = make_pipeline(
+        str(input_file),
+        str(output_file),
+        "import time\n\ndef transform(input_data):\n    time.sleep(2)\n    return input_data",
+    )
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+
+    cancel = client.post(f"/runs/{run_id}/cancel")
+    assert cancel.status_code == 200
+
+    data = wait_for_run(run_id, timeout_seconds=8)
+    assert data["status"] == "cancelled"
+    assert any(state["status"] == "cancelled" for state in data["node_states"].values())
+
+
+def test_run_parallel_ready_nodes_completes_quickly(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+    monkeypatch.setenv("RUN_MAX_WORKERS", "4")
+
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("hello")
+    output_file_a = tmp_path / "out_a.txt"
+    output_file_b = tmp_path / "out_b.txt"
+
+    pipeline = {
+        "id": "pipe-parallel",
+        "name": "Parallel",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "file_source",
+                "position": {"x": 10, "y": 0},
+                "config": {"path": str(input_file), "mode": "text"},
+            },
+            {
+                "id": "n3",
+                "type": "python_transform",
+                "position": {"x": 20, "y": 0},
+                "config": {
+                    "script": "import time\n\ndef transform(input_data):\n    time.sleep(1)\n    return str(input_data).upper()",
+                    "retries": 0,
+                    "retry_backoff_seconds": 0,
+                },
+            },
+            {
+                "id": "n4",
+                "type": "python_transform",
+                "position": {"x": 20, "y": 20},
+                "config": {
+                    "script": "import time\n\ndef transform(input_data):\n    time.sleep(1)\n    return str(input_data).lower()",
+                    "retries": 0,
+                    "retry_backoff_seconds": 0,
+                },
+            },
+            {
+                "id": "n5",
+                "type": "file_sink",
+                "position": {"x": 30, "y": 0},
+                "config": {"path": str(output_file_a), "mode": "text", "retries": 0, "retry_backoff_seconds": 0},
+            },
+            {
+                "id": "n6",
+                "type": "file_sink",
+                "position": {"x": 30, "y": 20},
+                "config": {"path": str(output_file_b), "mode": "text", "retries": 0, "retry_backoff_seconds": 0},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n2", "port": "trigger"}},
+            {"id": "e2", "source": {"node_id": "n2", "port": "data"}, "target": {"node_id": "n3", "port": "input"}},
+            {"id": "e3", "source": {"node_id": "n2", "port": "data"}, "target": {"node_id": "n4", "port": "input"}},
+            {"id": "e4", "source": {"node_id": "n3", "port": "output"}, "target": {"node_id": "n5", "port": "input"}},
+            {"id": "e5", "source": {"node_id": "n4", "port": "output"}, "target": {"node_id": "n6", "port": "input"}},
+        ],
+    }
+
+    started = time.time()
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id, timeout_seconds=8)
+    duration = time.time() - started
+
+    assert data["status"] == "succeeded"
+    assert duration < 2.5
+    assert output_file_a.read_text() == "HELLO"
+    assert output_file_b.read_text() == "hello"
+
+
+def test_run_pipeline_data_aggregation_then_llm_mock(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    output_file = tmp_path / "summary.txt"
+
+    pipeline = {
+        "id": "pipe-agg-llm",
+        "name": "Aggregation to LLM",
+        "version": "v1",
+        "nodes": [
+            {"id": "n1", "type": "manual_trigger", "position": {"x": 0, "y": 0}, "config": {}},
+            {
+                "id": "n2",
+                "type": "dataAggregation",
+                "position": {"x": 20, "y": 0},
+                "config": {"aggregationType": "sum", "values": [2, 3, 5]},
+            },
+            {
+                "id": "n3",
+                "type": "llm",
+                "position": {"x": 40, "y": 0},
+                "config": {"mode": "mock", "systemPrompt": "helpful assistant"},
+            },
+            {
+                "id": "n4",
+                "type": "file_sink",
+                "position": {"x": 60, "y": 0},
+                "config": {"path": str(output_file), "mode": "text"},
+            },
+        ],
+        "edges": [
+            {"id": "e1", "source": {"node_id": "n1", "port": "start"}, "target": {"node_id": "n2", "port": "data1"}},
+            {"id": "e2", "source": {"node_id": "n2", "port": "aggregated"}, "target": {"node_id": "n3", "port": "prompt"}},
+            {"id": "e3", "source": {"node_id": "n3", "port": "response"}, "target": {"node_id": "n4", "port": "input"}},
+        ],
+    }
+
+    create = client.post("/runs", json={"pipeline": pipeline})
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    data = wait_for_run(run_id)
+    assert data["status"] == "succeeded"
+    assert "Mock LLM response" in output_file.read_text()
+
+
+def test_get_file_sink_output_preview(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("hello")
+    output_file = tmp_path / "output.txt"
+
+    payload = {
+        "pipeline": make_pipeline(
+            str(input_file),
+            str(output_file),
+            "def transform(input_data):\n    return str(input_data).upper()",
+        )
+    }
+    create = client.post("/runs", json=payload)
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    wait_for_run(run_id)
+
+    preview = client.get(f"/runs/{run_id}/outputs/n4")
+    assert preview.status_code == 200
+    body = preview.json()
+    assert body["node_id"] == "n4"
+    assert body["path"] == str(output_file)
+    assert body["content"] == "HELLO"
+    assert body["missing"] is False
+
+
+def test_get_file_sink_output_preview_missing_node_artifact(tmp_path: Path, monkeypatch) -> None:
+    run_dir = tmp_path / ".runs"
+    monkeypatch.setenv("RUNS_DIR", str(run_dir))
+
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("hello")
+    output_file = tmp_path / "output.txt"
+
+    payload = {
+        "pipeline": make_pipeline(
+            str(input_file),
+            str(output_file),
+            "def transform(input_data):\n    return str(input_data).upper()",
+        )
+    }
+    create = client.post("/runs", json=payload)
+    assert create.status_code == 200
+    run_id = create.json()["run_id"]
+    wait_for_run(run_id)
+
+    preview = client.get(f"/runs/{run_id}/outputs/n3")
+    assert preview.status_code == 404

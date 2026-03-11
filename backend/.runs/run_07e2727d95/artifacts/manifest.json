@@ -1,0 +1,10 @@
+{
+  "run_id": "run_07e2727d95",
+  "artifacts": [
+    {
+      "node_id": "file_sink-1",
+      "type": "file_sink",
+      "value": "backend/.runs/demo/api-cars-summary.json"
+    }
+  ]
+}

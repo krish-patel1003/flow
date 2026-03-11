@@ -1,23 +1,24 @@
-## mini-sagemaker v1
+# mini-sagemaker v1
 
-Local, single-user, single-run pipeline execution demo.
+Local, single-user pipeline runner with a visual editor and FastAPI backend.
 
-### v1 node types
+Currently executable nodes:
 
 - `manual_trigger`
 - `file_source`
-- `python_transform` (inline script)
+- `python_transform` (inline Python script)
 - `file_sink`
+- `text`
+- `math`
+- `conditional`
+- `api`
+- `llm` (mock/echo)
+- `imageProcessing`
+- `dataAggregation`
 
-The UI still shows additional nodes as disabled with "Coming soon".
+The UI still shows `customInput` and `customOutput` as "Coming soon".
 
-## Project structure
-
-- `backend/` FastAPI API, validation, execution engine, tests
-- `frontend/` React + React Flow pipeline builder
-- `docs/v1-scope.md` current v1 behavior and limits
-
-## Docker setup (recommended quick start)
+## Quick start (Docker)
 
 From repository root:
 
@@ -25,10 +26,10 @@ From repository root:
 docker compose up --build
 ```
 
-Then open:
+Open:
 
 - Frontend: `http://localhost:3000`
-- Backend API docs: `http://localhost:8000/docs`
+- Backend docs: `http://localhost:8000/docs`
 
 Stop services:
 
@@ -36,31 +37,17 @@ Stop services:
 docker compose down
 ```
 
-Notes:
+## Quick start (local)
 
-- Backend run outputs are persisted to `backend/.runs/` on the host.
-- Frontend calls backend via `REACT_APP_API_BASE=http://localhost:8000` in compose.
-
-## Backend setup
+Backend:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r backend/requirements.txt
-```
-
-Run API:
-
-```bash
 .venv/bin/python -m uvicorn backend.main:app --reload
 ```
 
-Run backend tests:
-
-```bash
-.venv/bin/python -m pytest backend/tests
-```
-
-## Frontend setup
+Frontend (new terminal):
 
 ```bash
 cd frontend
@@ -68,56 +55,104 @@ npm install
 npm start
 ```
 
-Optional API URL override:
+Optional frontend env:
 
 - `REACT_APP_API_BASE` (default: `http://127.0.0.1:8000`)
 
-Run frontend tests:
+## Example pipeline (UI)
 
-```bash
-cd frontend
-CI=true npm test -- --watch=false
-```
+1. Add nodes: `Manual Trigger` -> `File Source` -> `Python Transform` -> `File Sink`
+2. Connect ports:
+   - `start -> trigger`
+   - `data -> input`
+   - `output -> input`
+3. Use config:
+   - `File Source`: path to input file, mode `text`
+   - `Python Transform`: `def transform(input_data): return str(input_data).upper()`
+   - `File Sink`: output path, mode `text`
+4. Click `Submit Pipeline`
 
-## Normalized pipeline schema
+Detailed API and payload examples: `docs/example-pipeline.md`.
 
-```json
-{
-  "id": "pipe-1",
-  "name": "Demo",
-  "version": "v1",
-  "nodes": [
-    {
-      "id": "n1",
-      "type": "manual_trigger",
-      "position": { "x": 0, "y": 0 },
-      "config": {}
-    }
-  ],
-  "edges": [
-    {
-      "id": "e1",
-      "source": { "node_id": "n1", "port": "start" },
-      "target": { "node_id": "n2", "port": "trigger" }
-    }
-  ]
-}
-```
+## Quick demo templates
+
+Use the `Load Demo Pipeline` dropdown in the toolbar to prefill one of these graphs:
+
+- `Uppercase File`
+- `API JSON Save`
+- `Parallel Branch`
+- `Aggregate + LLM`
+- `Public CSV ETL`
+- `ETL Chunked CSV (Large)`
+- `ETL Incremental Watermark`
+- `ETL API Chained (Cars)`
+
+Most templates write outputs to `backend/.runs/demo/*` by default.
+Large ETL templates also read sample config/data from `backend/.runs/demo/*`.
+
+`Aggregate + LLM` uses Ollama mode by default (`llama3.2:1b`).
+The LLM base URL now defaults to backend env var `OLLAMA_BASE_URL`
+(fallback: `http://127.0.0.1:11434`). In Docker Compose, this is set to
+`http://host.docker.internal:11434` so the backend container can reach host Ollama.
 
 ## API endpoints
 
 - `POST /pipelines/validate` validate schema + graph + ports + config
-- `POST /runs` create and execute one run synchronously
-- `GET /runs/{run_id}` fetch run status and node states
-- `GET /runs/{run_id}/logs/{node_id}` fetch node logs
-- `GET /runs/{run_id}/artifacts` fetch artifact manifest
+- `POST /runs` start a run asynchronously (`{"pipeline": ...}`)
+- `GET /runs` list runs
+- `POST /runs/{run_id}/cancel` request cancellation
+- `GET /runs/{run_id}` run status + per-node states
+- `GET /runs/{run_id}/logs/{node_id}` node log text
+- `GET /runs/{run_id}/artifacts` run artifact manifest
+- `GET /registry/nodes` list backend node registry metadata
 
 ## Run outputs
 
-Run data is persisted in:
+Each run persists:
 
 - `backend/.runs/<run_id>/run.json`
 - `backend/.runs/<run_id>/logs/*.log`
 - `backend/.runs/<run_id>/artifacts/manifest.json`
 
-If `RUNS_DIR` is set, that directory is used instead.
+Set `RUNS_DIR` to override output location.
+
+## Runtime controls
+
+- Single active run at a time
+- Parallel scheduling for ready DAG nodes (worker pool)
+- Node-level retries with exponential backoff
+- Cooperative cancellation (`POST /runs/{run_id}/cancel`)
+- UI run monitor panel with node statuses, attempts, and per-node log fetch
+- UI run monitor output preview for `file_sink` artifacts
+
+Config keys supported on executable nodes:
+
+- `retries` (default `0`)
+- `retry_backoff_seconds` (default `0`)
+
+Environment variables:
+
+- `RUN_MAX_WORKERS` (default `2`)
+- `RUNS_DIR` (custom run output directory)
+
+## Repo layout
+
+- `backend/` API, validation, execution engine, tests
+- `frontend/` React + React Flow UI
+- `docs/v1-scope.md` supported features and boundaries
+- `docs/example-pipeline.md` concrete payload and curl examples
+
+## Test commands
+
+Backend:
+
+```bash
+.venv/bin/python -m pytest backend/tests
+```
+
+Frontend:
+
+```bash
+cd frontend
+CI=true npm test -- --watch=false
+```

@@ -1,5 +1,6 @@
 import { PipelineToolbar } from './toolbar';
 import { PipelineUI } from './ui';
+import { RunMonitor } from './runMonitor';
 
 
 function App() {
@@ -7,7 +8,7 @@ function App() {
     <div>
       <PipelineToolbar />
       <PipelineUI />
-      
+      <RunMonitor />
     </div>
   );
 }

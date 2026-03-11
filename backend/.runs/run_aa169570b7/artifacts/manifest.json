@@ -1,0 +1,10 @@
+{
+  "run_id": "run_aa169570b7",
+  "artifacts": [
+    {
+      "node_id": "file_source-1",
+      "type": "file_source",
+      "value": "backend/.runs/demo/chunked-csv-config.json"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "run_id": "run_84ebd2ab1d",
+  "status": "succeeded",
+  "created_at": "2026-03-10T17:32:04.958638+00:00",
+  "started_at": "2026-03-10T17:32:04.960954+00:00",
+  "finished_at": "2026-03-10T17:32:17.423205+00:00",
+  "pipeline_id": "pipeline-demo",
+  "node_states": {
+    "manual_trigger-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-10T17:32:04.962220+00:00",
+      "finished_at": "2026-03-10T17:32:04.963191+00:00",
+      "error": null
+    },
+    "llm-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-10T17:32:04.965904+00:00",
+      "finished_at": "2026-03-10T17:32:17.416260+00:00",
+      "error": null
+    },
+    "file_sink-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-10T17:32:17.418178+00:00",
+      "finished_at": "2026-03-10T17:32:17.420552+00:00",
+      "error": null
+    },
+    "file_source-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-10T17:32:04.963794+00:00",
+      "finished_at": "2026-03-10T17:32:04.964910+00:00",
+      "error": null
+    }
+  }
+}

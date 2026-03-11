@@ -11,6 +11,11 @@ export const useStore = create((set, get) => ({
   edges: [],
   selectedEdge: null,
   nodeIDs: {},
+  currentRunId: null,
+  runStatus: null,
+  runNodeStates: {},
+  runError: null,
+  runLogs: {},
   getNodeID: (type) => {
     const newIDs = { ...get().nodeIDs };
     if (newIDs[type] === undefined) {
@@ -74,6 +79,50 @@ export const useStore = create((set, get) => ({
     set({
       edges: get().edges.filter((edge) => edge.id !== edgeId),
       selectedEdge: null,
+    });
+  },
+  loadGraph: (nodes, edges) => {
+    const nextNodeIDs = {};
+    nodes.forEach((node) => {
+      const [type, rawIndex] = String(node.id).split('-');
+      const index = Number(rawIndex);
+      if (!Number.isFinite(index)) {
+        return;
+      }
+      nextNodeIDs[type] = Math.max(nextNodeIDs[type] || 0, index);
+    });
+    set({
+      nodes,
+      edges,
+      nodeIDs: nextNodeIDs,
+      selectedEdge: null,
+    });
+  },
+  setCurrentRun: (runId) => {
+    set({
+      currentRunId: runId,
+      runStatus: 'pending',
+      runNodeStates: {},
+      runError: null,
+      runLogs: {},
+    });
+  },
+  setRunStatusPayload: (payload) => {
+    set({
+      runStatus: payload?.status || null,
+      runNodeStates: payload?.node_states || {},
+      runError: null,
+    });
+  },
+  setRunError: (message) => {
+    set({ runError: message });
+  },
+  setRunLog: (nodeId, logText) => {
+    set({
+      runLogs: {
+        ...get().runLogs,
+        [nodeId]: logText,
+      },
     });
   },
 }));

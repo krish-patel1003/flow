@@ -7,11 +7,18 @@ from pydantic import ValidationError
 
 from .registry import EXECUTABLE_NODE_TYPES, NODE_PORTS
 from .schemas import (
+    APIRequestConfig,
+    ConditionalConfig,
+    DataAggregationConfig,
     ErrorDetail,
     FileSinkConfig,
     FileSourceConfig,
+    ImageProcessingConfig,
+    LLMConfig,
+    MathConfig,
     Pipeline,
     PythonTransformConfig,
+    TextConfig,
 )
 
 
@@ -36,6 +43,27 @@ def _validate_node_config(node_type: str, config: dict, node_id: str) -> list[Er
             return []
         if node_type == "file_sink":
             FileSinkConfig.model_validate(config)
+            return []
+        if node_type == "text":
+            TextConfig.model_validate(config)
+            return []
+        if node_type == "math":
+            MathConfig.model_validate(config)
+            return []
+        if node_type == "conditional":
+            ConditionalConfig.model_validate(config)
+            return []
+        if node_type == "api":
+            APIRequestConfig.model_validate(config)
+            return []
+        if node_type == "llm":
+            LLMConfig.model_validate(config)
+            return []
+        if node_type == "imageProcessing":
+            ImageProcessingConfig.model_validate(config)
+            return []
+        if node_type == "dataAggregation":
+            DataAggregationConfig.model_validate(config)
             return []
     except ValidationError as exc:
         first = exc.errors()[0]

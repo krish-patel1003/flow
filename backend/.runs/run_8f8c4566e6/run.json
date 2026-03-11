@@ -1,0 +1,52 @@
+{
+  "run_id": "run_8f8c4566e6",
+  "status": "succeeded",
+  "created_at": "2026-03-11T01:17:21.298477+00:00",
+  "started_at": "2026-03-11T01:17:21.300999+00:00",
+  "finished_at": "2026-03-11T01:17:22.094571+00:00",
+  "pipeline_id": "pipeline-demo",
+  "node_states": {
+    "manual_trigger-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T01:17:21.302837+00:00",
+      "finished_at": "2026-03-11T01:17:21.304252+00:00",
+      "error": null
+    },
+    "api-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T01:17:21.305251+00:00",
+      "finished_at": "2026-03-11T01:17:21.783538+00:00",
+      "error": null
+    },
+    "python_transform-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T01:17:21.785626+00:00",
+      "finished_at": "2026-03-11T01:17:21.894302+00:00",
+      "error": null
+    },
+    "python_transform-2": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T01:17:21.895221+00:00",
+      "finished_at": "2026-03-11T01:17:21.992944+00:00",
+      "error": null
+    },
+    "python_transform-3": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T01:17:21.993951+00:00",
+      "finished_at": "2026-03-11T01:17:22.091109+00:00",
+      "error": null
+    },
+    "file_sink-1": {
+      "status": "succeeded",
+      "attempts": 1,
+      "started_at": "2026-03-11T01:17:22.092036+00:00",
+      "finished_at": "2026-03-11T01:17:22.093443+00:00",
+      "error": null
+    }
+  }
+}

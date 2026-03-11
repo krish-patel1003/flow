@@ -28,18 +28,67 @@ export const v1NodeRegistry = {
       mode: 'text',
     },
   },
+  text: {
+    label: 'Text',
+    executable: true,
+    defaults: {
+      template: '{{input}}',
+    },
+  },
+  math: {
+    label: 'Math',
+    executable: true,
+    defaults: {
+      operation: 'add',
+    },
+  },
+  conditional: {
+    label: 'Conditional',
+    executable: true,
+    defaults: {
+      operator: '==',
+    },
+  },
+  api: {
+    label: 'API Request',
+    executable: true,
+    defaults: {
+      method: 'GET',
+      url: '',
+      timeout_seconds: 10,
+    },
+  },
+  llm: {
+    label: 'LLM',
+    executable: true,
+    defaults: {
+      mode: 'mock',
+      systemPrompt: '',
+      model: 'llama3.2:1b',
+      temperature: 0.2,
+    },
+  },
+  imageProcessing: {
+    label: 'Image Processing',
+    executable: true,
+    defaults: {
+      operation: 'grayscale',
+      outputPath: '',
+    },
+  },
+  dataAggregation: {
+    label: 'Data Aggregation',
+    executable: true,
+    defaults: {
+      aggregationType: 'sum',
+      values: [],
+    },
+  },
 };
 
 export const comingSoonNodes = [
   { type: 'customInput', label: 'Input' },
-  { type: 'llm', label: 'LLM' },
   { type: 'customOutput', label: 'Output' },
-  { type: 'text', label: 'Text' },
-  { type: 'math', label: 'Math' },
-  { type: 'imageProcessing', label: 'Image Processing' },
-  { type: 'dataAggregation', label: 'Data Aggregation' },
-  { type: 'conditional', label: 'Conditional' },
-  { type: 'api', label: 'API' },
 ];
 
 export const pythonTransformPresets = [

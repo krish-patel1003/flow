@@ -1,0 +1,113 @@
+.run-monitor {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  width: 360px;
+  max-height: 80vh;
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  z-index: 20;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.run-monitor.minimized {
+  width: auto;
+  max-height: none;
+  padding: 8px 10px;
+}
+
+.run-monitor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.run-monitor-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.run-monitor-header button {
+  border: 1px solid #c4c4c4;
+  border-radius: 6px;
+  background: #f7f7f7;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.run-monitor h3 {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.run-row {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.run-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.run-actions button {
+  border: 1px solid #c4c4c4;
+  border-radius: 6px;
+  background: #f7f7f7;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.node-state-item {
+  border: 1px solid #ececec;
+  border-radius: 6px;
+  padding: 6px;
+  margin-bottom: 6px;
+}
+
+.node-state-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.node-state-head button {
+  border: 1px solid #c4c4c4;
+  border-radius: 6px;
+  background: #f7f7f7;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.node-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.node-state-item small {
+  display: block;
+  margin-top: 4px;
+}
+
+.node-log {
+  margin-top: 6px;
+  border: 1px solid #ececec;
+  border-radius: 6px;
+  background: #fafafa;
+  padding: 6px;
+  white-space: pre-wrap;
+  font-size: 12px;
+  max-height: 160px;
+  overflow: auto;
+}
+
+.output-preview {
+  max-height: 220px;
+}
