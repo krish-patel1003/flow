@@ -518,4 +518,133 @@ export const demoPipelines = [
       edge('e4', 'schema_validate-1', 'result', 'file_sink-1', 'input'),
     ],
   },
+  {
+    id: 'support-ticket-triage',
+    label: 'Support Ticket Triage',
+    description: 'Webhook support ticket -> priority routing -> alert + queue file',
+    nodes: [
+      {
+        id: 'webhook_trigger-1',
+        type: 'webhook_trigger',
+        position: { x: 80, y: 220 },
+        data: {
+          config: {
+            path: '/hooks/support/ticket',
+            method: 'POST',
+            sample_payload: {
+              ticket: {
+                id: 'tkt-2209',
+                customer: 'Acme Retail',
+                issue: 'Payment service unavailable',
+                severity: 5,
+                channel: 'email',
+              },
+            },
+          },
+        },
+      },
+      {
+        id: 'json_extract-1',
+        type: 'json_extract',
+        position: { x: 300, y: 220 },
+        data: { config: { path: 'payload.ticket.severity', use_default: true, default: 1 } },
+      },
+      {
+        id: 'filter-1',
+        type: 'filter',
+        position: { x: 500, y: 220 },
+        data: { config: { field: '', operator: '>=', value: 4 } },
+      },
+      {
+        id: 'notification-1',
+        type: 'notification',
+        position: { x: 740, y: 130 },
+        data: {
+          config: {
+            channel: 'log',
+            template: 'P1/P2 support ticket requires immediate attention. Severity={{input}}',
+          },
+        },
+      },
+      {
+        id: 'file_sink-1',
+        type: 'file_sink',
+        position: { x: 740, y: 320 },
+        data: { config: { path: 'backend/.runs/demo/support-triage-queue.json', mode: 'json' } },
+      },
+    ],
+    edges: [
+      edge('e1', 'webhook_trigger-1', 'payload', 'json_extract-1', 'input'),
+      edge('e2', 'json_extract-1', 'value', 'filter-1', 'input'),
+      edge('e3', 'filter-1', 'pass', 'notification-1', 'message'),
+      edge('e4', 'filter-1', 'fail', 'file_sink-1', 'input'),
+    ],
+  },
+  {
+    id: 'finance-invoice-validation',
+    label: 'Finance Invoice Validation',
+    description: 'Invoice webhook -> schema check -> finance alert + compliance report',
+    nodes: [
+      {
+        id: 'webhook_trigger-1',
+        type: 'webhook_trigger',
+        position: { x: 80, y: 220 },
+        data: {
+          config: {
+            path: '/hooks/finance/invoice',
+            method: 'POST',
+            sample_payload: {
+              invoice: {
+                invoice_id: 'inv-1049',
+                vendor: 'Northwind Services',
+                amount: 1299.5,
+                currency: 'USD',
+                due_date: '2026-03-15',
+              },
+            },
+          },
+        },
+      },
+      {
+        id: 'json_extract-1',
+        type: 'json_extract',
+        position: { x: 300, y: 220 },
+        data: { config: { path: 'payload.invoice', use_default: true, default: {} } },
+      },
+      {
+        id: 'schema_validate-1',
+        type: 'schema_validate',
+        position: { x: 520, y: 220 },
+        data: {
+          config: {
+            schema_type: 'required_keys',
+            required_keys: ['invoice_id', 'vendor', 'amount', 'currency', 'due_date'],
+          },
+        },
+      },
+      {
+        id: 'notification-1',
+        type: 'notification',
+        position: { x: 760, y: 130 },
+        data: {
+          config: {
+            channel: 'log',
+            template: 'Invoice payload validation completed: {{input}}',
+          },
+        },
+      },
+      {
+        id: 'file_sink-1',
+        type: 'file_sink',
+        position: { x: 760, y: 320 },
+        data: { config: { path: 'backend/.runs/demo/invoice-validation-report.json', mode: 'json' } },
+      },
+    ],
+    edges: [
+      edge('e1', 'webhook_trigger-1', 'payload', 'json_extract-1', 'input'),
+      edge('e2', 'json_extract-1', 'value', 'schema_validate-1', 'input'),
+      edge('e3', 'schema_validate-1', 'result', 'notification-1', 'message'),
+      edge('e4', 'schema_validate-1', 'result', 'file_sink-1', 'input'),
+    ],
+  },
 ];

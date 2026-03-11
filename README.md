@@ -96,6 +96,8 @@ Use the `Load Demo Pipeline` dropdown in the toolbar to prefill one of these gra
 - `Scheduled Ops Heartbeat`
 - `Webhook Lead Qualification`
 - `Webhook Order Validation`
+- `Support Ticket Triage`
+- `Finance Invoice Validation`
 
 Most templates write outputs to `backend/.runs/demo/*` by default.
 Large ETL templates also read sample config/data from `backend/.runs/demo/*`.
