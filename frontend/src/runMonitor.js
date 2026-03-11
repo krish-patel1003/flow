@@ -161,14 +161,10 @@ export const RunMonitor = () => {
     }
   };
 
-  if (!currentRunId) {
-    return null;
-  }
-
   return (
     <aside className={`run-monitor ${isMinimized ? 'minimized' : ''}`}>
       <div className="run-monitor-header">
-        <span className="run-monitor-title">Run Monitor</span>
+        <span className="run-monitor-title">Run Console</span>
         <div className="run-actions">
           <button onClick={() => setShowLogs((value) => !value)} disabled={isMinimized}>
             {showLogs ? 'Hide Logs' : 'Show Logs'}
@@ -181,37 +177,43 @@ export const RunMonitor = () => {
 
       {isMinimized ? null : (
         <>
-          <div className="run-row">Run: <strong>{currentRunId}</strong></div>
-          <div className="run-row">Status: <strong>{runStatus || 'pending'}</strong></div>
-          {runError ? <div className="run-row">Error: {runError}</div> : null}
-          <div className="run-actions">
-            <button onClick={refreshStatus}>Refresh</button>
-            <button onClick={fetchArtifacts}>Load Outputs</button>
-            <button onClick={cancelRun} disabled={terminalStatuses.has(runStatus)}>Cancel</button>
-          </div>
-
-          {Object.entries(runNodeStates).map(([nodeId, state]) => (
-            <div key={nodeId} className="node-state-item">
-              <div className="node-state-head">
-                <strong>{nodeId}</strong>
-                <div className="node-actions">
-                  <button onClick={() => fetchLog(nodeId)}>Load Log</button>
-                  {runArtifacts[nodeId] ? <button onClick={() => fetchOutput(nodeId)}>View Output</button> : null}
-                </div>
+          {!currentRunId ? (
+            <div className="run-row">No run yet. Submit a pipeline to see logs and outputs.</div>
+          ) : (
+            <>
+              <div className="run-row">Run: <strong>{currentRunId}</strong></div>
+              <div className="run-row">Status: <strong>{runStatus || 'pending'}</strong></div>
+              {runError ? <div className="run-row">Error: {runError}</div> : null}
+              <div className="run-actions">
+                <button onClick={refreshStatus}>Refresh</button>
+                <button onClick={fetchArtifacts}>Load Outputs</button>
+                <button onClick={cancelRun} disabled={terminalStatuses.has(runStatus)}>Cancel</button>
               </div>
-              <small>Status: {state.status}</small>
-              <small>Attempts: {state.attempts || 0}</small>
-              {runArtifacts[nodeId] ? <small>Output file: {runArtifacts[nodeId]}</small> : null}
-              {showLogs && runLogs[nodeId] ? <pre className="node-log">{runLogs[nodeId]}</pre> : null}
-              {runOutputs[nodeId] ? (
-                <>
-                  {runOutputs[nodeId].missing ? <small>Output file is missing on disk.</small> : null}
-                  {runOutputs[nodeId].truncated ? <small>Showing first 15,000 characters.</small> : null}
-                  <pre className="node-log output-preview">{runOutputs[nodeId].content || '(empty output)'}</pre>
-                </>
-              ) : null}
-            </div>
-          ))}
+
+              {Object.entries(runNodeStates).map(([nodeId, state]) => (
+                <div key={nodeId} className="node-state-item">
+                  <div className="node-state-head">
+                    <strong>{nodeId}</strong>
+                    <div className="node-actions">
+                      <button onClick={() => fetchLog(nodeId)}>Load Log</button>
+                      {runArtifacts[nodeId] ? <button onClick={() => fetchOutput(nodeId)}>View Output</button> : null}
+                    </div>
+                  </div>
+                  <small>Status: {state.status}</small>
+                  <small>Attempts: {state.attempts || 0}</small>
+                  {runArtifacts[nodeId] ? <small>Output file: {runArtifacts[nodeId]}</small> : null}
+                  {showLogs && runLogs[nodeId] ? <pre className="node-log">{runLogs[nodeId]}</pre> : null}
+                  {runOutputs[nodeId] ? (
+                    <>
+                      {runOutputs[nodeId].missing ? <small>Output file is missing on disk.</small> : null}
+                      {runOutputs[nodeId].truncated ? <small>Showing first 15,000 characters.</small> : null}
+                      <pre className="node-log output-preview">{runOutputs[nodeId].content || '(empty output)'}</pre>
+                    </>
+                  ) : null}
+                </div>
+              ))}
+            </>
+          )}
         </>
       )}
     </aside>

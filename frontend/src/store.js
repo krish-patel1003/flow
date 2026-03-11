@@ -133,6 +133,15 @@ export const useStore = create((set, get) => ({
       selectedNodeId: null,
     });
   },
+  resetGraph: () => {
+    set({
+      nodes: [],
+      edges: [],
+      nodeIDs: {},
+      selectedEdge: null,
+      selectedNodeId: null,
+    });
+  },
   setCurrentRun: (runId) => {
     set({
       currentRunId: runId,

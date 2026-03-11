@@ -14,18 +14,15 @@ import Text from "./assets/Text_format.svg";
 import { comingSoonNodes, v1NodeRegistry } from './nodeRegistry';
 import { DemoLoader } from './demoLoader';
 import { useStore } from './store';
+import { ResetCanvasButton } from './resetCanvas';
 
 export const PipelineToolbar = () => {
   const {
-    getNodeID,
-    addNode,
     librarySearch,
     activeLibraryCategory,
     setLibrarySearch,
     setActiveLibraryCategory,
   } = useStore((state) => ({
-    getNodeID: state.getNodeID,
-    addNode: state.addNode,
     librarySearch: state.librarySearch,
     activeLibraryCategory: state.activeLibraryCategory,
     setLibrarySearch: state.setLibrarySearch,
@@ -87,28 +84,6 @@ export const PipelineToolbar = () => {
       .sort((a, b) => Number(a.disabled) - Number(b.disabled) || a.label.localeCompare(b.label));
   }, [activeLibraryCategory, librarySearch]);
 
-  const addNodeToCanvas = (type) => {
-    if (!v1NodeRegistry[type]) {
-      return;
-    }
-    const nodeID = getNodeID(type);
-    const newNode = {
-      id: nodeID,
-      type,
-      position: {
-        x: 200 + Math.floor(Math.random() * 160),
-        y: 120 + Math.floor(Math.random() * 180),
-      },
-      data: {
-        id: nodeID,
-        nodeType: type,
-        edgeType: 'buttonedge',
-        config: { ...(v1NodeRegistry[type]?.defaults || {}) },
-      },
-    };
-    addNode(newNode);
-  };
-
   return (
     <aside className="toolbar">
       <div className="toolbar-head">
@@ -119,6 +94,7 @@ export const PipelineToolbar = () => {
       <div className="toolbar-controls">
         <DemoLoader />
         <SubmitPipelineButton />
+        <ResetCanvasButton />
       </div>
 
       <input
@@ -145,14 +121,6 @@ export const PipelineToolbar = () => {
       <div className="component-list">
         {nodeItems.map((node) => (
           <div key={node.type} className="component-item">
-            <button
-              type="button"
-              className="add-node-button"
-              onClick={() => addNodeToCanvas(node.type)}
-              disabled={node.disabled}
-            >
-              + Add
-            </button>
             <DraggableNode
               type={node.type}
               label={node.label}

@@ -12,8 +12,10 @@ function App() {
       <div className="canvas-pane">
         <PipelineUI />
       </div>
-      <InspectorPanel />
-      <RunMonitor />
+      <div className="right-pane">
+        <InspectorPanel />
+        <RunMonitor />
+      </div>
     </div>
   );
 }
