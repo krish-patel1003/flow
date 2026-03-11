@@ -166,9 +166,12 @@ const PipelineUIContent = () => {
     setSelectedNodeId(null);
   }, [setSelectedEdge, setSelectedNodeId]);
 
-  const onNodeClick = useCallback((event, node) => {
-    event.stopPropagation();
-    setSelectedNodeId(node.id);
+  const onSelectionChange = useCallback(({ nodes: selectedNodes }) => {
+    if (!selectedNodes || selectedNodes.length === 0) {
+      setSelectedNodeId(null);
+      return;
+    }
+    setSelectedNodeId(selectedNodes[0].id);
   }, [setSelectedNodeId]);
 
 
@@ -197,8 +200,8 @@ const PipelineUIContent = () => {
         onDrop={onDrop}
         onDragOver={onDragOver}
         onEdgeClick={onEdgeClick}
-        onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
+        onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         proOptions={proOptions}
