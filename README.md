@@ -93,6 +93,9 @@ Use the `Load Demo Pipeline` dropdown in the toolbar to prefill one of these gra
 - `ETL Chunked CSV (Large)`
 - `ETL Incremental Watermark`
 - `ETL API Chained (Cars)`
+- `Scheduled Ops Heartbeat`
+- `Webhook Lead Qualification`
+- `Webhook Order Validation`
 
 Most templates write outputs to `backend/.runs/demo/*` by default.
 Large ETL templates also read sample config/data from `backend/.runs/demo/*`.
